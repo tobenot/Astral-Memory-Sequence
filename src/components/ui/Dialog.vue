@@ -44,6 +44,8 @@ const handleOverlayClick = () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/assets/styles/_breakpoints.scss';
+
 .dialog-overlay {
   position: fixed;
   top: 0;
@@ -55,6 +57,10 @@ const handleOverlayClick = () => {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+
+  @include touch-device {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 .dialog-content {
@@ -65,6 +71,12 @@ const handleOverlayClick = () => {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+
+  @include respond-to('mobile') {
+    width: 90%;
+    min-width: auto;
+    margin: 1rem;
+  }
 }
 
 .dialog-header {
@@ -73,10 +85,36 @@ const handleOverlayClick = () => {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--columbia-blue-3);
+
+  @include respond-to('mobile') {
+    padding: 0.75rem;
+  }
+
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+    
+    &:hover {
+      color: var(--sky-blue);
+    }
+
+    @include touch-device {
+      padding: 0.5rem;
+      font-size: 1.75rem;
+    }
+  }
 }
 
 .dialog-body {
   padding: 1rem;
+
+  @include respond-to('mobile') {
+    padding: 0.75rem;
+  }
 }
 
 .dialog-footer {
@@ -85,18 +123,16 @@ const handleOverlayClick = () => {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
-}
 
-.close-button {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.25rem;
-  line-height: 1;
-  
-  &:hover {
-    color: var(--sky-blue);
+  @include respond-to('mobile') {
+    padding: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    
+    > * {
+      flex: 1;
+      min-width: 120px;
+    }
   }
 }
 
