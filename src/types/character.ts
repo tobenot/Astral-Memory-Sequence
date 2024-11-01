@@ -31,8 +31,8 @@ export interface Skill {
   description: string
   icon: string
   mpCost: number
-  cooldown: number
-  currentCooldown: number
+  cooldown: number      // 总冷却回合数
+  currentCooldown: number  // 当前剩余冷却回合数
   range: number
   type: 'active' | 'passive'
   targetType: 'single' | 'area' | 'self' | 'position'

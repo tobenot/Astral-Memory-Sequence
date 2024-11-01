@@ -89,6 +89,7 @@ export const useGameStore = defineStore('game', {
 
     async startNewHeroTurn(heroId: string) {
       const heroStore = useHeroStore()
+      const boardStore = useBoardStore()
       const hero = heroStore.heroes.get(heroId)
       
       if (!hero) return
@@ -96,6 +97,10 @@ export const useGameStore = defineStore('game', {
       this.turnState.isProcessing = true
       this.turnState.currentHeroId = heroId
       this.turnState.phase = TurnPhase.ACTION
+      
+      // 清除之前的技能选择状态
+      this.selectSkill(null)
+      boardStore.clearSelection()
       
       // 重置角色的行动点
       hero.actionPoints = { ...hero.maxActionPoints }
@@ -107,10 +112,8 @@ export const useGameStore = defineStore('game', {
           const ai = new EnemyAI(hero)
           await ai.executeTurn()
           
-          // 重要：在AI执行完后重置处理标志
           this.turnState.isProcessing = false
           
-          // 确保所有动作都完成后再结束回合
           await new Promise(resolve => setTimeout(resolve, 500))
           this.endHeroTurn()
         } catch (error) {
@@ -119,11 +122,29 @@ export const useGameStore = defineStore('game', {
           this.endHeroTurn()
         }
       } else {
+        // 如果是玩家角色，自动显示移动范围
+        if (hero.actionPoints.move > 0) {
+          const movablePositions = boardStore.calculateMovableRange(
+            hero.position,
+            hero.actionPoints.move
+          )
+          boardStore.setSelectableTiles(movablePositions)
+          heroStore.selectHero(heroId)
+        }
         this.turnState.isProcessing = false
       }
     },
 
     endHeroTurn() {
+      if (!this.currentHero) return
+
+      // 更新当前英雄的所有技能冷却
+      this.currentHero.skills.forEach(skill => {
+        if (skill.currentCooldown > 0) {
+          skill.currentCooldown--
+        }
+      })
+
       // 防止回合结束时重复触发
       if (this.turnState.isProcessing) return
       
@@ -279,61 +300,23 @@ export const useGameStore = defineStore('game', {
       this.selectedSkill = skill
     },
 
-    async useSkill(target: Hero | Hero[] | Position) {
-      const currentHero = this.currentHero
-      const selectedSkill = this.selectedSkill
-      
-      console.log('开始使用技能:', {
-        currentHero: currentHero?.name,
-        selectedSkill: selectedSkill?.name,
-        target
-      })
-      
-      if (!currentHero || !selectedSkill || currentHero.actionPoints.skill <= 0) {
-        console.log('技能使用失败: 英雄/技能无效或没有行动点')
-        return false
-      }
+    async useSkill(target: SkillTarget): Promise<boolean> {
+      const hero = this.currentHero
+      const skill = this.selectedSkill
+      if (!hero || !skill) return false
 
-      // 检查MP是否足够
-      if (currentHero.stats.mp < selectedSkill.mpCost) {
-        console.log('技能使用失败: MP不足')
-        return false
-      }
-
-      try {
-        // 执行技能效果
-        console.log('执行技能效果前:', {
-          casterHP: currentHero.stats.hp,
-          casterMP: currentHero.stats.mp,
-          targetHP: ('stats' in target) ? target.stats.hp : null
-        })
-        
-        await selectedSkill.effect(currentHero, target)
-        
-        console.log('技能效果执行后:', {
-          casterHP: currentHero.stats.hp,
-          casterMP: currentHero.stats.mp,
-          targetHP: ('stats' in target) ? target.stats.hp : null
-        })
-        
-        // 消耗MP
-        currentHero.stats.mp -= selectedSkill.mpCost
-        
-        // 设置技能冷却
-        selectedSkill.currentCooldown = selectedSkill.cooldown
-        
-        // 消耗行动点
-        currentHero.actionPoints.skill--
-        
-        // 清除选中的技能
-        this.selectedSkill = null
-        
-        console.log('技能使用成功')
-        return true
-      } catch (error) {
-        console.error('技能使用失败:', error)
-        return false
-      }
+      // 检查技能是否可用
+      if (skill.currentCooldown > 0) return false
+      
+      // 使用技能
+      await skill.effect(hero, target)
+      
+      // 设置技能冷却
+      skill.currentCooldown = skill.cooldown
+      hero.stats.mp -= skill.mpCost
+      hero.actionPoints.skill--
+      
+      return true
     },
 
     findTargetAtPosition(position: Position): Hero | null {

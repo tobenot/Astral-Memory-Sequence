@@ -51,10 +51,9 @@ export class EnemyAI {
   }
 
   private findBestSkill(target: Hero) {
-    // 从可用技能中选择最佳技能
-    // 这里可以根据具体需求实现更复杂的选择逻辑
+    // 修改技能选择逻辑，加入冷却检查
     return this.hero.skills.find(skill => 
-      skill.currentCooldown === 0 && 
+      skill.currentCooldown === 0 && // 确保技能不在冷却中
       this.hero.stats.mp >= skill.mpCost
     )
   }
@@ -65,7 +64,7 @@ export class EnemyAI {
         // 使用技能
         skill.effect(this.hero, target)
         
-        // 更新技能冷却和消耗
+        // 设置技能冷却
         skill.currentCooldown = skill.cooldown
         this.hero.stats.mp -= skill.mpCost
         this.hero.actionPoints.skill = 0
