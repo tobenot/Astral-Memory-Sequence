@@ -54,19 +54,24 @@ export interface ActionPoints {
   item: number
 }
 
-export interface Character {
+// 修改 Character 为 Hero 接口并导出
+export interface Hero {
   id: string
   name: string
-  type: CharacterType
+  title?: string
+  description?: string
+  avatar: string
+  portrait?: string
+  tags: HeroTag[]
   level: number
   exp: number
   position: Position
   stats: CharacterStats
-  skills: Skill[]       // 英雄特有技能
+  skills: Skill[]
   status: StatusEffect[]
   isAlly: boolean
-  actionPoints: ActionPoints  // 添加行动点属性
-  maxActionPoints: ActionPoints  // 添加最大行动点属性
+  actionPoints: ActionPoints
+  maxActionPoints: ActionPoints
 }
 
 // 添加状态效果的具体类型

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { Character, CharacterStats, StatusEffect } from '@/types/character'
+import type { Character, CharacterStats, StatusEffect, Hero } from '@/types/character'
 import type { Position } from '@/types/board'
 import { CharacterType } from '@/types/character'
 
@@ -58,7 +58,7 @@ export const useCharacterStore = defineStore('character', {
         moveRange: 2
       }
 
-      const character: Character = {
+      const character = {
         id,
         name: params.name,
         type: params.type,
@@ -68,8 +68,10 @@ export const useCharacterStore = defineStore('character', {
         stats: this.adjustStatsByType(baseStats, params.type),
         skills: [],
         status: [],
-        isAlly: params.isAlly
-      }
+        isAlly: params.isAlly,
+        actionPoints: { ...DEFAULT_ACTION_POINTS },
+        maxActionPoints: { ...DEFAULT_ACTION_POINTS }
+      } as Hero
 
       this.characters.set(id, character)
       return character

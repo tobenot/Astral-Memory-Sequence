@@ -36,7 +36,7 @@ export const useGameStore = defineStore('game', {
       currentHeroId: null,
       remainingActions: 0,
       turnOrder: [],
-      phase: 'prepare',
+      phase: TurnPhase.PREPARE,
       isProcessing: false
     },
     actionPoints: { ...DEFAULT_ACTION_POINTS },
@@ -172,7 +172,7 @@ export const useGameStore = defineStore('game', {
       if (!this.currentHero) return
 
       // 更新当前英雄的所有技能冷却
-      this.currentHero.skills.forEach(skill => {
+      this.currentHero.skills.forEach((skill: Skill) => {
         if (skill.currentCooldown > 0) {
           skill.currentCooldown--
         }

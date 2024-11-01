@@ -1,4 +1,4 @@
-import type { Hero } from '@/types/character'
+import type { Hero, Skill } from '@/types/character'
 import type { Position } from '@/types/board'
 import { useBoardStore } from '@/stores/board'
 import { useHeroStore } from '@/stores/hero'
@@ -73,13 +73,13 @@ export class EnemyAI {
   }
 
   private findBestSkill(target: Hero) {
-    const availableSkills = this.hero.skills.filter(skill => 
-        skill.currentCooldown === 0 && // 确保技能不在冷却中
+    const availableSkills = this.hero.skills.filter((skill: Skill) => 
+        skill.currentCooldown === 0 && 
         this.hero.stats.mp >= skill.mpCost
     )
     
     console.log(`[EnemyAI] ${this.hero.name} 可用技能:`, 
-        availableSkills.map(s => ({
+        availableSkills.map((s: Skill) => ({
             name: s.name,
             cooldown: s.currentCooldown,
             mpCost: s.mpCost,
@@ -87,7 +87,7 @@ export class EnemyAI {
         }))
     )
     
-    return availableSkills[0] // 返回第一个可用技能
+    return availableSkills[0]
   }
 
   private async useSkill(skill: any, target: Hero): Promise<void> {
