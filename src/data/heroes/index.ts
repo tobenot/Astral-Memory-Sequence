@@ -278,8 +278,8 @@ export const heroes: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 1,
-      maxHp: 1,
+      hp: 100,
+      maxHp: 100,
       mp: 100,
       maxMp: 100,
       attack: 12,
@@ -308,8 +308,8 @@ export const heroes: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 1,
-      maxHp: 1,
+      hp: 100,
+      maxHp: 100,
       mp: 60,
       maxMp: 60,
       attack: 15,
@@ -338,8 +338,8 @@ export const heroes: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 1,
-      maxHp: 1,
+      hp: 100,
+      maxHp: 100,
       mp: 80,
       maxMp: 80,
       attack: 14,
@@ -368,8 +368,8 @@ export const heroes: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 1,
-      maxHp: 1,
+      hp: 100,
+      maxHp: 100,
       mp: 120,
       maxMp: 120,
       attack: 8,

@@ -13,64 +13,108 @@ export class EnemyAI {
   }
 
   async executeTurn(): Promise<void> {
+    console.log(`[EnemyAI] ${this.hero.name} 开始执行回合`)
+    
     // 1. 寻找最近的敌人
     const target = this.findNearestTarget()
-    if (!target) return
+    if (!target) {
+        console.log(`[EnemyAI] ${this.hero.name} 没有找到目标`)
+        return
+    }
+    console.log(`[EnemyAI] ${this.hero.name} 找到目标: ${target.name}`)
 
     // 2. 计算与目标的距离
     const distance = this.calculateDistance(this.hero.position, target.position)
+    console.log(`[EnemyAI] 与目标距离: ${distance}, 行动点数:`, this.hero.actionPoints)
 
     // 3. 执行行动
     // 如果有可用的技能，优先尝试使用技能
     if (this.hero.actionPoints.skill > 0 && this.hero.skills.length > 0) {
-      const bestSkill = this.findBestSkill(target)
-      if (bestSkill) {
-        // 如果技能射程不够，先尝试移动接近目标
-        if (distance > bestSkill.range && this.hero.actionPoints.move > 0) {
-          await this.moveTowardsTarget(target.position)
+        const bestSkill = this.findBestSkill(target)
+        if (bestSkill) {
+            console.log(`[EnemyAI] ${this.hero.name} 选择技能: ${bestSkill.name}`)
+            
+            // 如果技能射程不够，先尝试移动接近目标
+            if (distance > bestSkill.range && this.hero.actionPoints.move > 0) {
+                console.log(`[EnemyAI] 技能射程不够，尝试移动接近目标`)
+                await this.moveTowardsTarget(target.position)
+            }
+            
+            // 重新计算距离
+            const newDistance = this.calculateDistance(this.hero.position, target.position)
+            console.log(`[EnemyAI] 移动后与目标距离: ${newDistance}, 技能射程: ${bestSkill.range}`)
+            
+            if (newDistance <= bestSkill.range) {
+                console.log(`[EnemyAI] ${this.hero.name} 准备使用技能: ${bestSkill.name}`)
+                await this.useSkill(bestSkill, target)
+            } else {
+                console.log(`[EnemyAI] 目标仍在射程外，无法使用技能`)
+            }
+        } else {
+            console.log(`[EnemyAI] ${this.hero.name} 没有找到合适的技能`)
         }
-        
-        // 重新计算距离
-        const newDistance = this.calculateDistance(this.hero.position, target.position)
-        if (newDistance <= bestSkill.range) {
-          await this.useSkill(bestSkill, target)
-        }
-      }
+    } else {
+        console.log(`[EnemyAI] ${this.hero.name} 没有可用的技能点数或技能列表为空`)
     }
+    
     // 如果没有可用技能但还能移动，则移动接近目标
-    else if (this.hero.actionPoints.move > 0) {
-      await this.moveTowardsTarget(target.position)
+    if (this.hero.actionPoints.move > 0) {
+        console.log(`[EnemyAI] ${this.hero.name} 尝试移动接近目标`)
+        await this.moveTowardsTarget(target.position)
     }
 
     // 确保所有行动点都被消耗完
     this.hero.actionPoints = {
-      move: 0,
-      skill: 0,
-      item: 0
+        move: 0,
+        skill: 0,
+        item: 0
     }
+    console.log(`[EnemyAI] ${this.hero.name} 回合结束`)
   }
 
   private findBestSkill(target: Hero) {
-    // 修改技能选择逻辑，加入冷却检查
-    return this.hero.skills.find(skill => 
-      skill.currentCooldown === 0 && // 确保技能不在冷却中
-      this.hero.stats.mp >= skill.mpCost
+    const availableSkills = this.hero.skills.filter(skill => 
+        skill.currentCooldown === 0 && // 确保技能不在冷却中
+        this.hero.stats.mp >= skill.mpCost
     )
+    
+    console.log(`[EnemyAI] ${this.hero.name} 可用技能:`, 
+        availableSkills.map(s => ({
+            name: s.name,
+            cooldown: s.currentCooldown,
+            mpCost: s.mpCost,
+            currentMp: this.hero.stats.mp
+        }))
+    )
+    
+    return availableSkills[0] // 返回第一个可用技能
   }
 
   private async useSkill(skill: any, target: Hero): Promise<void> {
+    console.log(`[EnemyAI] ${this.hero.name} 开始使用技能 ${skill.name}`)
+    console.log(`[EnemyAI] 技能详情:`, {
+        mpCost: skill.mpCost,
+        currentMp: this.hero.stats.mp,
+        cooldown: skill.cooldown
+    })
+    
     return new Promise(resolve => {
-      setTimeout(() => {
-        // 使用技能
-        skill.effect(this.hero, target)
-        
-        // 设置技能冷却
-        skill.currentCooldown = skill.cooldown
-        this.hero.stats.mp -= skill.mpCost
-        this.hero.actionPoints.skill = 0
-        
-        resolve()
-      }, 500)
+        setTimeout(() => {
+            try {
+                // 使用技能
+                skill.effect(this.hero, target)
+                
+                // 设置技能冷却
+                skill.currentCooldown = skill.cooldown
+                this.hero.stats.mp -= skill.mpCost
+                this.hero.actionPoints.skill = 0
+                
+                console.log(`[EnemyAI] ${this.hero.name} 技能使用完成，剩余MP: ${this.hero.stats.mp}`)
+            } catch (error) {
+                console.error(`[EnemyAI] 技能使用出错:`, error)
+            }
+            resolve()
+        }, 500)
     })
   }
 
