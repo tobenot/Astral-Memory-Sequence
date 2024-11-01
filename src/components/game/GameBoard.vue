@@ -74,32 +74,6 @@
         />
       </div>
     </div>
-    
-    <!-- 修改回合控制按钮区域 -->
-    <div class="turn-controls">
-      <div class="turn-info">
-        <TurnIndicator />
-      </div>
-      <div class="turn-buttons">
-        <button 
-          class="turn-btn skip-turn-btn"
-          @click="handleSkipTurn"
-          :disabled="!isCurrentHeroAlly"
-        >
-          <span>跳过行动</span>
-        </button>
-        <button 
-          class="turn-btn end-turn-btn"
-          @click="handleEndTurn"
-          :disabled="!isCurrentHeroAlly || !gameStore.hasRemainingActions"
-        >
-          <span>结束回合</span>
-          <span class="action-points" v-if="gameStore.hasRemainingActions">
-            (剩余行动点)
-          </span>
-        </button>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -151,7 +125,17 @@ const isHovered = (position: Position) => {
 }
 
 // 事件处理
-const handleTileClick = (tile: Tile) => {
+const handleTileClick = async (tile: Tile) => {
+  const gameStore = useGameStore()
+  
+  // 如果有选中的技能
+  if (gameStore.selectedSkill) {
+    if (isSelectable(tile.position)) {
+      await gameStore.useSkill(tile.position)
+    }
+    return
+  }
+
   const selectedHero = heroStore.selectedHero
   
   if (selectedHero && isSelectable(tile.position)) {
@@ -222,42 +206,6 @@ const handleHeroClick = (hero: Hero) => {
 // 修改计算距离的方法（曼哈顿距离）
 const calculateDistance = (from: Position, to: Position): number => {
   return Math.abs(from.x - to.x) + Math.abs(from.y - to.y)
-}
-
-// 添加回合结束按钮的处理函数
-const handleEndTurn = () => {
-  // 清理当前角色的状态
-  board.clearSelection()
-  heroStore.selectHero(null)
-  
-  // 结束当前回合，切换到下一个角色
-  gameStore.endHeroTurn()
-  
-  // 如果下一个角色是AI控制的敌人，这里后续可以触发AI行动
-  const nextHero = gameStore.currentHero
-  if (nextHero && !nextHero.isAlly) {
-    // TODO: 处理AI回合
-    console.log('AI回合:', nextHero.name)
-    // 暂时自动结束AI回合
-    setTimeout(() => {
-      gameStore.endHeroTurn()
-    }, 1000)
-  }
-}
-
-// 添加计算属性判断当前行动角色是否为友方
-const isCurrentHeroAlly = computed(() => {
-  const currentHero = gameStore.currentHero
-  return currentHero?.isAlly ?? false
-})
-
-// 添加跳过回合的处理函数
-const handleSkipTurn = () => {
-  // 清理当前状态
-  board.clearSelection()
-  heroStore.selectHero(null)
-  // 直接结束当前回合
-  gameStore.endHeroTurn()
 }
 
 // 添加视图位置状态
@@ -340,75 +288,6 @@ const stopTouch = () => {
   position: absolute;
   transition: transform 0.1s ease;
   will-change: transform;
-}
-
-.turn-controls {
-  position: fixed;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
-  margin-top: 1rem;
-  padding: 1rem;
-  background: var(--columbia-blue-2);
-  border-radius: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-  .turn-buttons {
-    display: flex;
-    gap: 1rem;
-
-    .turn-btn {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      line-height: 1.2;
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .action-points {
-        font-size: 0.75rem;
-        opacity: 0.8;
-      }
-    }
-
-    .skip-turn-btn {
-      background: var(--columbia-blue-3);
-      color: #2c3e50;
-      
-      &:hover:not(:disabled) {
-        background: var(--powder-blue);
-        transform: translateY(-2px);
-      }
-    }
-
-    .end-turn-btn {
-      background: var(--powder-blue);
-      color: white;
-      
-      &:hover:not(:disabled) {
-        background: var(--sky-blue);
-        transform: translateY(-2px);
-      }
-
-      &:disabled {
-        background: var(--columbia-blue-3);
-      }
-    }
-  }
 }
 
 .game-board {

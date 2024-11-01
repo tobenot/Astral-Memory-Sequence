@@ -21,6 +21,10 @@ export interface CharacterStats {
   speed: number
 }
 
+// 添加技能目标类型
+export type SkillTarget = Hero | Hero[] | Position
+
+// 修改技能接口
 export interface Skill {
   id: string
   name: string
@@ -31,8 +35,8 @@ export interface Skill {
   currentCooldown: number
   range: number
   type: 'active' | 'passive'
-  targetType: 'single' | 'area' | 'self'
-  effect: (caster: Hero, target: Position) => void
+  targetType: 'single' | 'area' | 'self' | 'position'
+  effect: (caster: Hero, target: SkillTarget) => void
 }
 
 export interface ActionPoints {
@@ -63,12 +67,12 @@ export interface Hero {
 export interface StatusEffect {
   id: string
   name: string
-  icon: string
   description: string
+  icon: string
   duration: number
   effect: {
     type: 'buff' | 'debuff'
-    stats: Partial<CharacterStats>
+    stats: Partial<Record<keyof CharacterStats, number>>
   }
 }
 

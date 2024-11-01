@@ -21,17 +21,25 @@ export class EnemyAI {
     const distance = this.calculateDistance(this.hero.position, target.position)
 
     // 3. 执行行动
-    // 先尝试移动
-    if (this.hero.actionPoints.move > 0) {
-      await this.moveTowardsTarget(target.position)
+    // 如果有可用的技能，优先尝试使用技能
+    if (this.hero.actionPoints.skill > 0 && this.hero.skills.length > 0) {
+      const bestSkill = this.findBestSkill(target)
+      if (bestSkill) {
+        // 如果技能射程不够，先尝试移动接近目标
+        if (distance > bestSkill.range && this.hero.actionPoints.move > 0) {
+          await this.moveTowardsTarget(target.position)
+        }
+        
+        // 重新计算距离
+        const newDistance = this.calculateDistance(this.hero.position, target.position)
+        if (newDistance <= bestSkill.range) {
+          await this.useSkill(bestSkill, target)
+        }
+      }
     }
-
-    // 重新计算与目标的距离（因为可能已经移动过了）
-    const newDistance = this.calculateDistance(this.hero.position, target.position)
-    
-    // 如果在攻击范围内且还有技能点数，则进行攻击
-    if (newDistance <= 1 && this.hero.actionPoints.skill > 0) {
-      await this.attack(target)
+    // 如果没有可用技能但还能移动，则移动接近目标
+    else if (this.hero.actionPoints.move > 0) {
+      await this.moveTowardsTarget(target.position)
     }
 
     // 确保所有行动点都被消耗完
@@ -40,6 +48,31 @@ export class EnemyAI {
       skill: 0,
       item: 0
     }
+  }
+
+  private findBestSkill(target: Hero) {
+    // 从可用技能中选择最佳技能
+    // 这里可以根据具体需求实现更复杂的选择逻辑
+    return this.hero.skills.find(skill => 
+      skill.currentCooldown === 0 && 
+      this.hero.stats.mp >= skill.mpCost
+    )
+  }
+
+  private async useSkill(skill: any, target: Hero): Promise<void> {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        // 使用技能
+        skill.effect(this.hero, target)
+        
+        // 更新技能冷却和消耗
+        skill.currentCooldown = skill.cooldown
+        this.hero.stats.mp -= skill.mpCost
+        this.hero.actionPoints.skill = 0
+        
+        resolve()
+      }, 500)
+    })
   }
 
   private findNearestTarget(): Hero | null {

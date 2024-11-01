@@ -1,6 +1,24 @@
 import type { Hero } from '@/types/character'
 import { HeroTag, DEFAULT_ACTION_POINTS } from '@/types/character'
 
+// 添加基础攻击技能
+const basicAttack = {
+  id: 'basic_attack',
+  name: '基础攻击',
+  description: '近距离攻击',
+  icon: '/skills/basic_attack.png',
+  mpCost: 0,
+  cooldown: 0,
+  currentCooldown: 0,
+  range: 1,
+  type: 'active',
+  targetType: 'single',
+  effect: (caster, target) => {
+    const damage = Math.max(1, caster.stats.attack - target.stats.defense)
+    target.stats.hp = Math.max(0, target.stats.hp - damage)
+  }
+}
+
 // 敌人单位数据
 export const enemies: Hero[] = [
   {
@@ -23,7 +41,7 @@ export const enemies: Hero[] = [
       defense: 3,
       speed: 7
     },
-    skills: [],
+    skills: [basicAttack],
     status: [],
     isAlly: false,
     actionPoints: { ...DEFAULT_ACTION_POINTS },
@@ -53,7 +71,7 @@ export const enemies: Hero[] = [
       defense: 2,
       speed: 4
     },
-    skills: [],
+    skills: [basicAttack],
     status: [],
     isAlly: false,
     actionPoints: { ...DEFAULT_ACTION_POINTS },
@@ -83,7 +101,7 @@ export const enemies: Hero[] = [
       defense: 8,
       speed: 3
     },
-    skills: [],
+    skills: [basicAttack],
     status: [],
     isAlly: false,
     actionPoints: { ...DEFAULT_ACTION_POINTS },

@@ -10,6 +10,7 @@ import { TurnPhase } from '@/types/turn'
 import type { ActionPoints } from '@/types/character'
 import { enemies } from '@/data/enemies'
 import { EnemyAI } from '@/game/ai/EnemyAI'
+import type { Skill, SkillTarget } from '@/types/character'
 
 interface GameState {
   currentTurn: number
@@ -18,6 +19,7 @@ interface GameState {
   playerTeam: string[]
   turnState: TurnState
   actionPoints: ActionPoint
+  selectedSkill: Skill | null
 }
 
 export const useGameStore = defineStore('game', {
@@ -33,7 +35,8 @@ export const useGameStore = defineStore('game', {
       phase: 'prepare',
       isProcessing: false
     },
-    actionPoints: { ...DEFAULT_ACTION_POINTS }
+    actionPoints: { ...DEFAULT_ACTION_POINTS },
+    selectedSkill: null
   }),
 
   getters: {
@@ -270,6 +273,89 @@ export const useGameStore = defineStore('game', {
       this.isGameStarted = false
       this.isPaused = false
       this.playerTeam = []
+    },
+
+    selectSkill(skill: Skill | null) {
+      this.selectedSkill = skill
+    },
+
+    async useSkill(position: Position) {
+      if (!this.selectedSkill || !this.currentHero) return
+
+      const skill = this.selectedSkill
+      const hero = this.currentHero
+
+      // 检查是否可以使用技能
+      if (skill.currentCooldown > 0 || 
+          hero.stats.mp < skill.mpCost || 
+          hero.actionPoints.skill <= 0) {
+        return
+      }
+
+      // 根据技能类型处理目标
+      let target: SkillTarget
+      switch (skill.targetType) {
+        case 'single': {
+          const targetHero = this.findTargetAtPosition(position)
+          if (!targetHero) return
+          target = targetHero
+          break
+        }
+        case 'area': {
+          const targets = this.findTargetsInRange(position, skill.range)
+          if (targets.length === 0) return
+          target = targets
+          break
+        }
+        case 'self': {
+          target = hero
+          break
+        }
+        case 'position': {
+          target = position
+          break
+        }
+        default:
+          return
+      }
+
+      // 执行技能
+      await this.executeSkill(skill, hero, target)
+
+      // 消耗资源
+      hero.stats.mp -= skill.mpCost
+      hero.actionPoints.skill--
+      skill.currentCooldown = skill.cooldown
+
+      // 清理选择状态
+      this.selectSkill(null)
+      const boardStore = useBoardStore()
+      boardStore.clearSelection()
+    },
+
+    async executeSkill(skill: Skill, caster: Hero, target: SkillTarget) {
+      return new Promise<void>(resolve => {
+        setTimeout(() => {
+          skill.effect(caster, target)
+          resolve()
+        }, 500)
+      })
+    },
+
+    findTargetAtPosition(position: Position): Hero | null {
+      const heroStore = useHeroStore()
+      return Array.from(heroStore.heroes.values()).find(
+        hero => hero.position.x === position.x && hero.position.y === position.y
+      ) || null
+    },
+
+    findTargetsInRange(center: Position, range: number): Hero[] {
+      const heroStore = useHeroStore()
+      return Array.from(heroStore.heroes.values()).filter(hero => {
+        const distance = Math.abs(hero.position.x - center.x) + 
+                        Math.abs(hero.position.y - center.y)
+        return distance <= range
+      })
     }
   }
 }) 

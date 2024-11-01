@@ -1,13 +1,10 @@
 <template>
   <div class="game-layout">
-    <header class="game-header">
+    <div class="floating-turn-controls">
       <div class="turn-info">
         <TurnIndicator />
       </div>
-      <div class="action-bar">
-        <!-- 行动条将在这里实现 -->
-      </div>
-    </header>
+    </div>
     
     <main class="game-main">
       <div class="board-viewport">
@@ -19,30 +16,68 @@
       </aside>
     </main>
 
-    <footer class="game-footer">
-      <slot name="controls"></slot>
-    </footer>
+    <div class="action-panel" :class="{ 'show': gameStore.currentHero?.isAlly }">
+      <div class="action-content">
+        <div class="skill-bar-container">
+          <SkillBar v-if="gameStore.currentHero?.isAlly" />
+          <div class="turn-buttons">
+            <button 
+              class="turn-btn skip-turn-btn"
+              @click="handleSkipTurn"
+              :disabled="!isCurrentHeroAlly"
+            >
+              <span>跳过行动</span>
+            </button>
+            <button 
+              class="turn-btn end-turn-btn"
+              @click="handleEndTurn"
+              :disabled="!isCurrentHeroAlly || !gameStore.hasRemainingActions"
+            >
+              <span>结束回合</span>
+              <span class="action-points" v-if="gameStore.hasRemainingActions">
+                (剩余行动点)
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { useGameStore } from '@/stores/game'
+import TurnIndicator from '@/components/game/TurnIndicator.vue'
+import SkillBar from '@/components/game/SkillBar.vue'
+
+const gameStore = useGameStore()
+const showInfoPanel = ref(true)
+
+const isCurrentHeroAlly = computed(() => {
+  const currentHero = gameStore.currentHero
+  return currentHero?.isAlly ?? false
+})
+
+const handleEndTurn = () => {
+  gameStore.endHeroTurn()
+}
+
+const handleSkipTurn = () => {
+  gameStore.endHeroTurn()
+}
+</script>
 
 <style lang="scss" scoped>
 @import '@/assets/styles/_breakpoints.scss';
 
 .game-layout {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: 1fr;
   height: 100vh;
   background: var(--columbia-blue);
   overflow: hidden;
-
-  .game-header {
-    padding: 1rem;
-    background: var(--columbia-blue-2);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 10;
-  }
+  position: relative;
 
   .game-main {
     display: grid;
@@ -69,10 +104,98 @@
     overflow-y: auto;
   }
 
-  .game-footer {
-    padding: 1rem;
+  .floating-turn-controls {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    padding: 0.75rem 1rem;
     background: var(--columbia-blue-2);
-    z-index: 10;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .action-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: 100;
+    
+    &.show {
+      transform: translateY(0);
+    }
+
+    .action-content {
+      background: var(--columbia-blue-2);
+      padding: 1rem;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+
+      .skill-bar-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .turn-buttons {
+          display: flex;
+          gap: 1rem;
+          margin-left: auto;
+          
+          .turn-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.2;
+
+            &:disabled {
+              opacity: 0.5;
+              cursor: not-allowed;
+            }
+
+            .action-points {
+              font-size: 0.75rem;
+              opacity: 0.8;
+            }
+          }
+
+          .skip-turn-btn {
+            background: var(--columbia-blue-3);
+            color: #2c3e50;
+            
+            &:hover:not(:disabled) {
+              background: var(--powder-blue);
+              transform: translateY(-2px);
+            }
+          }
+
+          .end-turn-btn {
+            background: var(--powder-blue);
+            color: white;
+            
+            &:hover:not(:disabled) {
+              background: var(--sky-blue);
+              transform: translateY(-2px);
+            }
+
+            &:disabled {
+              background: var(--columbia-blue-3);
+            }
+          }
+        }
+      }
+    }
   }
 }
 </style> 
