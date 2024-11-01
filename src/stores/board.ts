@@ -74,6 +74,7 @@ export const useBoardStore = defineStore('board', {
     },
 
     calculateMovableRange(position: Position, moveRange: number): Position[] {
+      console.log('Calculating movable range:', { position, moveRange })
       const range: Position[] = []
       const visited = new Set<string>()
       const queue: {pos: Position, steps: number}[] = [{pos: position, steps: 0}]
@@ -115,6 +116,7 @@ export const useBoardStore = defineStore('board', {
         }
       }
       
+      console.log('Calculated movable positions:', range)
       return range
     },
 
@@ -122,11 +124,11 @@ export const useBoardStore = defineStore('board', {
       if (!this.isValidPosition(position)) return false
       
       const tile = this.tiles[position.y][position.x]
-      if (!tile.isWalkable) return false
+      if (!TILE_TYPE_CONFIG[tile.type].isWalkable) return false
       
       // 检查是否有其他角色占据
       const heroStore = useHeroStore()
-      return !Array.from(heroStore.heroes.values()).some((hero: Hero) => 
+      return !Array.from(heroStore.heroes.values()).some(hero => 
         hero.position.x === position.x && hero.position.y === position.y
       )
     },

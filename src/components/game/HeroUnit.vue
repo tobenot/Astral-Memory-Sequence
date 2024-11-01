@@ -56,6 +56,38 @@ const props = defineProps<{
   hero: Hero
 }>()
 
+const emit = defineEmits<{
+  (e: 'click', hero: Hero): void
+  (e: 'tile-click', tile: Tile): void
+}>()
+
+const handleClick = () => {
+  const heroStore = useHeroStore()
+  const boardStore = useBoardStore()
+  
+  // 如果单位已死亡，不处理点击事件
+  if (heroStore.deadHeroes.has(props.hero.id)) {
+    console.log(`[Click] Ignoring click on dead hero ${props.hero.name}`)
+    return
+  }
+
+  console.log(`[Click] Hero clicked: ${props.hero.name}`)
+  
+  const gameStore = useGameStore()
+  if (gameStore.selectedSkill) {
+    console.log('[Click] Has selected skill, simulating tile click')
+    const tile: Tile = {
+      position: props.hero.position,
+      type: boardStore.tiles[props.hero.position.y][props.hero.position.x].type,
+      isWalkable: true,
+      isOccupied: true
+    }
+    emit('tile-click', tile)
+  } else {
+    emit('click', props.hero)
+  }
+}
+
 const gameStore = useGameStore()
 const boardStore = useBoardStore()
 
@@ -68,34 +100,6 @@ const unitStyle = computed(() => ({
   '--unit-y': `${props.hero.position.y * 80}px`,
   '--unit-z': isCurrentTurn.value ? '1' : '0'
 }))
-
-const handleClick = () => {
-  const heroStore = useHeroStore()
-  
-  // 如果单位已死亡，不处理点击事件
-  if (heroStore.deadHeroes.has(props.hero.id)) {
-    console.log(`[Click] Ignoring click on dead hero ${props.hero.name}`)
-    return
-  }
-
-  console.log(`[Click] Hero clicked: ${props.hero.name}`)
-  
-  if (gameStore.selectedSkill) {
-    console.log('[Click] Has selected skill, simulating tile click')
-    const tile = {
-      position: props.hero.position,
-      type: boardStore.tiles[props.hero.position.y][props.hero.position.x].type
-    }
-    emit('tile-click', tile)
-  } else {
-    emit('click', props.hero)
-  }
-}
-
-const emit = defineEmits<{
-  (e: 'click', hero: Hero): void
-  (e: 'tile-click', tile: Tile): void
-}>()
 
 const heroStore = useHeroStore()
 const isDead = computed(() => heroStore.deadHeroes.has(props.hero.id))

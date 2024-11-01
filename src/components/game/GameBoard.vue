@@ -29,7 +29,7 @@
             :key="`${tile.position.x}-${tile.position.y}`"
             class="board-tile"
             :class="[
-              tile.type,
+              TILE_TYPE_CONFIG[tile.type].className,
               {
                 'highlighted': isHighlighted(tile.position),
                 'selectable': isSelectable(tile.position),
@@ -84,7 +84,7 @@ import { useBoardStore } from '@/stores/board'
 import { useHeroStore } from '@/stores/hero'
 import { useGameStore } from '@/stores/game'
 import type { Position, Tile } from '@/types/board'
-import { TileType } from '@/types/board'
+import { TILE_TYPE_CONFIG } from '@/types/board'
 import type { Hero } from '@/types/character'
 import { useMouseHandler } from '@/utils/mouse'
 import HeroUnit from './HeroUnit.vue'
@@ -163,7 +163,7 @@ const handleTileClick = async (tile: Tile) => {
       const distance = Math.abs(selectedHero.position.x - tile.position.x) + 
                       Math.abs(selectedHero.position.y - tile.position.y)
       
-      // 检查是否有足够的移动点数
+      // 检查是��有足够的移动点数
       if (selectedHero.actionPoints.move >= distance) {
         // 移动英雄
         await heroStore.moveHero(selectedHero.id, tile.position)
@@ -211,14 +211,18 @@ const handleMouseLeave = () => {
 
 // 处理角色点击
 const handleHeroClick = (hero: Hero) => {
+  console.log('Hero clicked:', hero)
   if (hero.id === gameStore.turnState.currentHeroId && hero.isAlly) {
+    console.log('Valid hero selected')
     heroStore.selectHero(hero.id)
+    
     if (hero.actionPoints.move > 0) {
-      // 直接使用剩余移动点数作为移动范围
+      console.log('Calculating movable range')
       const movablePositions = board.calculateMovableRange(
         hero.position, 
-        hero.actionPoints.move // 不再乘以 moveRange
+        hero.actionPoints.move
       )
+      console.log('Movable positions:', movablePositions)
       board.setSelectableTiles(movablePositions)
     }
   }
@@ -456,8 +460,12 @@ const getSkillTarget = (tile: Tile) => {
       background: var(--columbia-blue-3);
     }
 
-    &.void {
+    &.water {
       background: var(--powder-blue);
+    }
+
+    &.void {
+      background: var(--sky-blue);
       pointer-events: none;
     }
 

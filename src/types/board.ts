@@ -7,11 +7,10 @@ export interface Position {
 }
 
 export enum TileType {
-  GROUND = 'ground',    // 普通地面
-  WALL = 'wall',        // 墙壁
-  WATER = 'water',      // 水域
-  FOREST = 'forest',    // 森林
-  MOUNTAIN = 'mountain' // 山地
+  GROUND = 'ground',
+  WALL = 'wall',
+  WATER = 'water',
+  VOID = 'void'
 }
 
 export interface Tile {
@@ -29,12 +28,23 @@ export const DEFAULT_TILE_CONFIG: Omit<Tile, 'position'> = {
 }
 
 // 添加瓦片类型的行走属性配置
-export const TILE_TYPE_CONFIG: Record<TileType, { isWalkable: boolean }> = {
-  [TileType.GROUND]: { isWalkable: true },
-  [TileType.WALL]: { isWalkable: false },
-  [TileType.WATER]: { isWalkable: false },
-  [TileType.FOREST]: { isWalkable: true },
-  [TileType.MOUNTAIN]: { isWalkable: false }
+export const TILE_TYPE_CONFIG = {
+  [TileType.GROUND]: {
+    isWalkable: true,
+    className: 'normal'
+  },
+  [TileType.WALL]: {
+    isWalkable: false,
+    className: 'obstacle'
+  },
+  [TileType.WATER]: {
+    isWalkable: false,
+    className: 'water'
+  },
+  [TileType.VOID]: {
+    isWalkable: false,
+    className: 'void'
+  }
 }
 
 export interface Board {

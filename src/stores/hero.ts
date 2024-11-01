@@ -4,6 +4,7 @@ import type { Position } from '@/types/board'
 import { heroes } from '@/data/heroes'
 import { storeToRefs } from 'pinia'
 import { useGameStore } from './game'
+import { useBoardStore } from './board'
 
 interface HeroState {
   heroes: Map<string, Hero>
@@ -150,7 +151,14 @@ export const useHeroStore = defineStore('hero', {
     },
 
     selectHero(heroId: string | null) {
+      console.log('Selecting hero:', heroId)
       this.selectedHeroId = heroId
+      
+      // 如果取消选择，清除棋盘上的选择状态
+      if (!heroId) {
+        const boardStore = useBoardStore()
+        boardStore.clearSelection()
+      }
     },
 
     setActiveHero(heroId: string | null) {
