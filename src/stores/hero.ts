@@ -86,11 +86,17 @@ export const useHeroStore = defineStore('hero', {
       // 应用所有状态效果
       hero.status.forEach(status => {
         Object.entries(status.effect.stats).forEach(([key, value]) => {
-          if (typeof value === 'number') {
-            const statKey = key as keyof CharacterStats
-            hero.stats[statKey as keyof CharacterStats] = 
-              (baseStats[statKey as keyof CharacterStats] || 0) * 
-              (1 + (status.effect.stats[statKey as keyof CharacterStats] || 0))
+          const statKey = key as keyof CharacterStats
+          // 确保只处理数值类型的属性
+          if (typeof value === 'number' && 
+              typeof hero.stats[statKey] === 'number' && 
+              !['deathPrevention'].includes(statKey)) {
+            const baseValue = baseStats[statKey] as number
+            const modifier = value as number
+            hero.stats[statKey as keyof Omit<CharacterStats, 'deathPrevention'>] = 
+              status.effect.type === 'buff'
+                ? baseValue * (1 + modifier)
+                : baseValue * (1 - modifier)
           }
         })
       })

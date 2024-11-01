@@ -79,7 +79,7 @@ export interface Hero {
   type: CharacterType
 }
 
-// 添加状态效果的具体类型
+// 修改 StatusEffectStats 接口
 export interface StatusEffectStats {
   hp?: number
   maxHp?: number
@@ -88,6 +88,10 @@ export interface StatusEffectStats {
   attack?: number
   defense?: number
   speed?: number
+  stealth?: number
+  damageReduction?: number
+  damageReceived?: number
+  deathPrevention?: boolean
 }
 
 // 完善StatusEffect接口
@@ -112,3 +116,6 @@ export const DEFAULT_ACTION_POINTS: ActionPoints = {
 
 // 在文件末尾，导出 Position 类型
 export type { Position }
+
+// 添加一个新的类型来区分数值属性和布尔属性
+export type NumericStats = Exclude<keyof CharacterStats, 'deathPrevention'>

@@ -1,5 +1,5 @@
 import type { Hero, Skill, SkillTarget } from '@/types/character'
-import { HeroTag, DEFAULT_ACTION_POINTS } from '@/types/character'
+import { HeroTag, DEFAULT_ACTION_POINTS, CharacterType } from '@/types/character'
 import { useHeroStore } from '@/stores/hero'
 
 // 基础技能
@@ -96,7 +96,7 @@ const iceShield: Skill = {
 const windSlash: Skill = {
   id: 'wind_slash',
   name: '风之斩击',
-  description: '快速突进并造成180%攻击力的伤害，击中后获得1回合加速',
+  description: '快速突进并造成180%攻击力的伤害，击中后获得1回合��速',
   icon: '/skills/wind_slash.png',
   mpCost: 20,
   cooldown: 2,

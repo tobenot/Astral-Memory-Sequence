@@ -139,11 +139,15 @@ export const useCharacterStore = defineStore('character', {
         if (status.effect.stats) {
           Object.entries(status.effect.stats).forEach(([key, value]) => {
             const statKey = key as keyof CharacterStats
-            if (typeof value === 'number' && typeof character.stats[statKey] === 'number') {
+            if (typeof value === 'number' && 
+                typeof character.stats[statKey] === 'number' && 
+                !['deathPrevention'].includes(statKey)) {
               const baseValue = character.stats[statKey] as number
-              character.stats[statKey as keyof CharacterStats] = status.effect.type === 'buff'
-                ? baseValue * (1 + (status.effect.stats[statKey] || 0))
-                : baseValue * (1 - (status.effect.stats[statKey] || 0))
+              const modifier = value as number
+              character.stats[statKey as keyof Omit<CharacterStats, 'deathPrevention'>] = 
+                status.effect.type === 'buff'
+                  ? baseValue * (1 + modifier)
+                  : baseValue * (1 - modifier)
             }
           })
         }
