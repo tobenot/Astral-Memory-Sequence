@@ -523,6 +523,18 @@ export const useGameStore = defineStore('game', {
         console.log(`[Turn Order] Starting next hero's turn: ${nextHeroId}`)
         this.startNewHeroTurn(nextHeroId)
       }
+    },
+
+    // 添加或修改 useActionPoints 方法
+    useActionPoints(type: 'move' | 'skill' | 'item', amount: number = 1) {
+      const hero = this.currentHero
+      if (!hero) return false
+
+      if (hero.actionPoints[type] >= amount) {
+        hero.actionPoints[type] -= amount
+        return true
+      }
+      return false
     }
   }
 }) 

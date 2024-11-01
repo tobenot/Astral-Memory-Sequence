@@ -159,16 +159,32 @@ const handleTileClick = async (tile: Tile) => {
     // 移动逻辑
     const selectedHero = heroStore.selectedHero
     if (selectedHero && isSelectable(tile.position)) {
-      const distance = calculateDistance(selectedHero.position, tile.position)
+      // 计算曼哈顿距离
+      const distance = Math.abs(selectedHero.position.x - tile.position.x) + 
+                      Math.abs(selectedHero.position.y - tile.position.y)
+      
+      // 检查是否有足够的移动点数
       if (selectedHero.actionPoints.move >= distance) {
         // 移动英雄
-        heroStore.moveHero(selectedHero.id, tile.position)
+        await heroStore.moveHero(selectedHero.id, tile.position)
         // 消耗移动点数
-        gameStore.useActionPoint('move')
-        // 不再清除选择状态，让 useActionPoint 处理
+        gameStore.useActionPoints('move', distance)
+        
+        // 如果还有移动点数，重新计算并显示移动范围
+        if (selectedHero.actionPoints.move > 0) {
+          const movablePositions = board.calculateMovableRange(
+            tile.position, // 使用新位置
+            selectedHero.actionPoints.move
+          )
+          board.setSelectableTiles(movablePositions)
+        } else {
+          // 只有当没有移动点数时才清除选择状态
+          board.clearSelection()
+          heroStore.selectHero(null)
+        }
       }
     } else if (isSelected(tile.position)) {
-      // 如果点击的是已选中的格子，才清除选择状态
+      // 点击已选中的格子时取消选择
       board.clearSelection()
       heroStore.selectHero(null)
     }
