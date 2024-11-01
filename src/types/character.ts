@@ -26,6 +26,7 @@ export interface CharacterStats {
   attack: number
   defense: number
   speed: number
+  stealth?: boolean
 }
 
 // 添加技能目标类型

@@ -203,7 +203,7 @@ const shadowStep: Skill = {
       effect: {
         type: 'buff',
         stats: {
-          attackBonus: 0.5,
+          attack: 0.5,
           stealth: true
         }
       }
@@ -295,10 +295,10 @@ export const heroes: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 100,
-      maxHp: 100,
-      mp: 100,
-      maxMp: 100,
+      hp: 40,
+      maxHp: 40,
+      mp: 40,
+      maxMp: 40,
       attack: 12,
       defense: 4,
       speed: 4
@@ -325,8 +325,8 @@ export const heroes: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 100,
-      maxHp: 100,
+      hp: 40,
+      maxHp: 40,
       mp: 60,
       maxMp: 60,
       attack: 15,
@@ -355,8 +355,8 @@ export const heroes: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 100,
-      maxHp: 100,
+      hp: 40,
+      maxHp: 40,
       mp: 80,
       maxMp: 80,
       attack: 14,
@@ -385,8 +385,8 @@ export const heroes: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 100,
-      maxHp: 100,
+      hp: 40,
+      maxHp: 40,
       mp: 120,
       maxMp: 120,
       attack: 8,

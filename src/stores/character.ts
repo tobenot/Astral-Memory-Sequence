@@ -49,8 +49,8 @@ export const useCharacterStore = defineStore('character', {
       const id = `char_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       
       const baseStats: CharacterStats = {
-        hp: 100,
-        maxHp: 100,
+        hp: 40,
+        maxHp: 40,
         mp: 50,
         maxMp: 50,
         attack: 10,
@@ -135,8 +135,8 @@ export const useCharacterStore = defineStore('character', {
     applyStatusEffects(character: Hero) {
       // 重置状态
       character.stats = this.adjustStatsByType({
-        hp: 100,
-        maxHp: 100,
+        hp: 40,
+        maxHp: 40,
         mp: 50,
         maxMp: 50,
         attack: 10,

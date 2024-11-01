@@ -132,8 +132,8 @@ export const enemies: Hero[] = [
     stats: {
       hp: 80,
       maxHp: 80,
-      mp: 100,
-      maxMp: 100,
+      mp: 40,
+      maxMp: 40,
       attack: 16,
       defense: 3,
       speed: 7
@@ -190,8 +190,8 @@ export const enemies: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 100,
-      maxHp: 100,
+      hp: 40,
+      maxHp: 40,
       mp: 80,
       maxMp: 80,
       attack: 12,
