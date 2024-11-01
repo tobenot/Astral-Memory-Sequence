@@ -204,7 +204,7 @@ const shadowStep: Skill = {
         type: 'buff',
         stats: {
           attack: 0.5,
-          stealth: true
+          stealth: 1
         }
       }
     })

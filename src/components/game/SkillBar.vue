@@ -38,6 +38,7 @@ import type { Skill } from '@/types/character'
 import { useGameStore } from '@/stores/game'
 import { useBoardStore } from '@/stores/board'
 import Tooltip from '@/components/ui/Tooltip.vue'
+import type { Position } from '@/types/board'
 
 const gameStore = useGameStore()
 const boardStore = useBoardStore()

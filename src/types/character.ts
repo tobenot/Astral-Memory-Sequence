@@ -26,7 +26,6 @@ export interface CharacterStats {
   attack: number
   defense: number
   speed: number
-  stealth?: boolean
 }
 
 // 添加技能目标类型
@@ -58,10 +57,10 @@ export interface ActionPoints {
 export interface Hero {
   id: string
   name: string
-  title?: string
-  description?: string
+  title: string
+  description: string
   avatar: string
-  portrait?: string
+  portrait: string
   tags: HeroTag[]
   level: number
   exp: number
