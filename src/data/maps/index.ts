@@ -49,19 +49,9 @@ export const tutorialMap: MapData = {
       position: { x: 5, y: 5 }
     },
     {
-      id: 'dark_mage', 
-      level: 1,
-      position: { x: 6, y: 5 }
-    },
-    {
       id: 'corrupted_knight',
       level: 1,
       position: { x: 5, y: 6 }
-    },
-    {
-      id: 'death_prophet',
-      level: 1,
-      position: { x: 6, y: 6 }
     }
   ],
   waves: []
