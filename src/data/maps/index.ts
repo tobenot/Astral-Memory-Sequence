@@ -41,7 +41,31 @@ export const tutorialMap: MapData = {
   ],
   rewards: {
     exp: 100
-  }
+  },
+  enemies: [
+    {
+      id: 'shadow_assassin',
+      level: 1,
+      position: { x: 5, y: 5 }
+    },
+    {
+      id: 'dark_mage',
+      level: 1,
+      position: { x: 6, y: 5 }
+    }
+  ],
+  waves: [
+    {
+      turn: 3,
+      enemies: [
+        {
+          id: 'corrupted_knight',
+          level: 1,
+          position: { x: 5, y: 6 }
+        }
+      ]
+    }
+  ]
 }
 
 export const maps: MapData[] = [

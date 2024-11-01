@@ -8,6 +8,8 @@ import { DEFAULT_ACTION_POINTS } from '@/types/turn'
 import { heroes } from '@/data/heroes'
 import { TurnPhase } from '@/types/turn'
 import type { ActionPoints } from '@/types/character'
+import { enemies } from '@/data/enemies'
+import { EnemyAI } from '@/game/ai/EnemyAI'
 
 interface GameState {
   currentTurn: number
@@ -64,6 +66,7 @@ export const useGameStore = defineStore('game', {
       this.isGameStarted = true
       this.currentTurn = 1
       this.spawnHeroes()
+      this.spawnEnemies()
       this.initializeTurnOrder()
     },
 
@@ -81,7 +84,7 @@ export const useGameStore = defineStore('game', {
       this.startNewHeroTurn(this.turnState.turnOrder[0].heroId)
     },
 
-    startNewHeroTurn(heroId: string) {
+    async startNewHeroTurn(heroId: string) {
       const heroStore = useHeroStore()
       const hero = heroStore.heroes.get(heroId)
       
@@ -97,10 +100,21 @@ export const useGameStore = defineStore('game', {
       heroStore.setActiveHero(heroId)
       
       if (!hero.isAlly) {
-        console.log('AI回合:', hero.name)
-        setTimeout(() => {
+        try {
+          const ai = new EnemyAI(hero)
+          await ai.executeTurn()
+          
+          // 重要：在AI执行完后重置处理标志
+          this.turnState.isProcessing = false
+          
+          // 确保所有动作都完成后再结束回合
+          await new Promise(resolve => setTimeout(resolve, 500))
           this.endHeroTurn()
-        }, 1000)
+        } catch (error) {
+          console.error('AI执行出错:', error)
+          this.turnState.isProcessing = false
+          this.endHeroTurn()
+        }
       } else {
         this.turnState.isProcessing = false
       }
@@ -191,8 +205,56 @@ export const useGameStore = defineStore('game', {
       spawnPoint.isOccupied = true
     },
 
+    spawnEnemies() {
+      const boardStore = useBoardStore()
+      const heroStore = useHeroStore()
+      
+      // 获取当前地图的敌人配置
+      const mapEnemies = boardStore.currentMap?.enemies || []
+      
+      // 生成初始敌人
+      mapEnemies.forEach(enemyConfig => {
+        const enemyTemplate = enemies.find(e => e.id === enemyConfig.id)
+        if (enemyTemplate) {
+          const enemy = {
+            ...enemyTemplate,
+            level: enemyConfig.level,
+            position: enemyConfig.position,
+            isAlly: false
+          }
+          heroStore.heroes.set(enemy.id, enemy)
+        }
+      })
+    },
+
+    checkWaveSpawn() {
+      const boardStore = useBoardStore()
+      const heroStore = useHeroStore()
+      
+      // 检查是否有新的敌人波次需要生成
+      const currentWave = boardStore.currentMap?.waves?.find(
+        wave => wave.turn === this.currentTurn
+      )
+      
+      if (currentWave) {
+        currentWave.enemies.forEach(enemyConfig => {
+          const enemyTemplate = enemies.find(e => e.id === enemyConfig.id)
+          if (enemyTemplate) {
+            const enemy = {
+              ...enemyTemplate,
+              level: enemyConfig.level,
+              position: enemyConfig.position,
+              isAlly: false
+            }
+            heroStore.heroes.set(enemy.id, enemy)
+          }
+        })
+      }
+    },
+
     endTurn() {
       this.currentTurn++
+      this.checkWaveSpawn()
     },
 
     pauseGame() {

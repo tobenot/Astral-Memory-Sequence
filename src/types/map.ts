@@ -31,4 +31,17 @@ export interface MapData extends MapConfig {
     exp: number
     items?: string[]
   }
+  enemies: EnemyConfig[] // 添加敌人配置
+  waves?: WaveConfig[] // 添加波次配置
+}
+
+export interface EnemyConfig {
+  id: string
+  level: number
+  position: Position
+}
+
+export interface WaveConfig {
+  turn: number
+  enemies: EnemyConfig[]
 } 
