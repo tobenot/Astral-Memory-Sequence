@@ -258,7 +258,7 @@ export const useGameStore = defineStore('game', {
       ) || []
 
       // 重置所有出生点状态
-      boardStore.currentMap?.spawnPoints.forEach(point => {
+      boardStore.currentMap?.spawnPoints.forEach((point: SpawnPoint) => {
         point.isOccupied = false
       })
 
@@ -311,7 +311,7 @@ export const useGameStore = defineStore('game', {
       const mapEnemies = boardStore.currentMap?.enemies || []
       
       // 生成初始敌人
-      mapEnemies.forEach(enemyConfig => {
+      mapEnemies.forEach((enemyConfig: { id: string; level: number; position: Position }) => {
         const enemyTemplate = enemies.find(e => e.id === enemyConfig.id)
         if (enemyTemplate) {
           const enemy = {
@@ -335,7 +335,7 @@ export const useGameStore = defineStore('game', {
       )
       
       if (currentWave) {
-        currentWave.enemies.forEach(enemyConfig => {
+        currentWave.enemies.forEach((enemyConfig: { id: string; level: number; position: Position }) => {
           const enemyTemplate = enemies.find(e => e.id === enemyConfig.id)
           if (enemyTemplate) {
             const enemy = {
@@ -465,7 +465,7 @@ export const useGameStore = defineStore('game', {
       // 重新添加玩家英雄
       heroes.forEach((hero, index) => {
         const spawnPoint = currentMap.spawnPoints.find(
-          point => point.type === SpawnPointType.ALLY && !point.isOccupied
+          (point: SpawnPoint) => point.type === SpawnPointType.ALLY && !point.isOccupied
         )
         
         if (spawnPoint) {
@@ -480,7 +480,7 @@ export const useGameStore = defineStore('game', {
       })
 
       // 重新添加敌人
-      currentMap.enemies.forEach(enemy => {
+      currentMap.enemies.forEach((enemy: { id: string; level: number; position: Position }) => {
         const enemyTemplate = enemies.find(e => e.id === enemy.id)
         if (enemyTemplate) {
           const newEnemy = { ...enemyTemplate }

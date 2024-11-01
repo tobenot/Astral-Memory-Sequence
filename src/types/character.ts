@@ -11,6 +11,13 @@ export enum HeroTag {
   HEALER = 'healer'       // 治疗
 }
 
+export enum CharacterType {
+  WARRIOR = 'warrior',
+  MAGE = 'mage',
+  ARCHER = 'archer',
+  SUPPORT = 'support'
+}
+
 export interface CharacterStats {
   hp: number
   maxHp: number
@@ -19,10 +26,11 @@ export interface CharacterStats {
   attack: number
   defense: number
   speed: number
+  moveRange: number
 }
 
 // 添加技能目标类型
-export type SkillTarget = Hero | Hero[] | Position
+export type SkillTarget = Character | Character[] | Position
 
 // 修改技能接口
 export interface Skill {
@@ -36,7 +44,7 @@ export interface Skill {
   range: number
   type: 'active' | 'passive'
   targetType: 'single' | 'area' | 'self' | 'position'
-  effect: (caster: Hero, target: SkillTarget) => void | Promise<void>
+  effect: (caster: Character, target: SkillTarget) => void | Promise<void>
   aoeRange?: number
 }
 
@@ -46,14 +54,10 @@ export interface ActionPoints {
   item: number
 }
 
-export interface Hero {
+export interface Character {
   id: string
   name: string
-  title: string          // 称号
-  description: string    // 背景故事
-  avatar: string        // 头像
-  portrait: string      // 立绘
-  tags: HeroTag[]       // 英雄标签
+  type: CharacterType
   level: number
   exp: number
   position: Position
@@ -85,13 +89,19 @@ export interface StatusEffect {
   duration: number
   effect: {
     type: 'buff' | 'debuff'
-    stats: StatusEffectStats
+    stats: Partial<Record<keyof CharacterStats, number>>
   }
 }
 
 // 默认行动点配置
 export const DEFAULT_ACTION_POINTS: ActionPoints = {
-  move: 1,
+  move: 2,
   skill: 1,
   item: 1
-} 
+}
+
+// 添加并导出 Position 类型
+export interface Position {
+  x: number
+  y: number
+}
