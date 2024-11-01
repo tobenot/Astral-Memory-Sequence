@@ -1,22 +1,25 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { setupRouterGuards } from './guards'
+import HomeView from '@/views/HomeView.vue'
+import GameView from '@/views/GameView.vue'
+import SettingsView from '@/views/SettingsView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    component: () => import('@/views/HomeView.vue')
+    component: HomeView
   },
   {
     path: '/game',
     name: 'game',
-    component: () => import('@/views/GameView.vue')
+    component: GameView
   },
   {
     path: '/settings',
     name: 'settings',
-    component: () => import('@/views/SettingsView.vue')
+    component: SettingsView
   },
   {
     path: '/:pathMatch(.*)*',
