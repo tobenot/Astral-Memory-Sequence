@@ -155,22 +155,29 @@ const handleTileClick = (tile: Tile) => {
   const selectedHero = heroStore.selectedHero
   
   if (selectedHero && isSelectable(tile.position)) {
-    // 检查是否有移动点数
-    if (selectedHero.actionPoints.move > 0) {
+    const distance = calculateDistance(selectedHero.position, tile.position)
+    // 检查是否有足够的移动点数
+    if (selectedHero.actionPoints.move >= distance) {
       // 移动英雄
       heroStore.moveHero(selectedHero.id, tile.position)
       // 消耗移动点数
-      selectedHero.actionPoints.move--
+      selectedHero.actionPoints.move -= distance
       // 清除选择状态
       board.clearSelection()
       heroStore.selectHero(null)
       
       // 如果没有任何行动点了，自动结束回合
-      const hasRemainingActions = Object.values(selectedHero.actionPoints).some(points => points > 0)
-      if (!hasRemainingActions) {
+      if (!gameStore.hasRemainingActions) {
         setTimeout(() => {
           gameStore.endHeroTurn()
         }, 500)
+      } else if (selectedHero.actionPoints.move > 0) {
+        // 如果还有移动点数，重新显示可移动范围
+        const movablePositions = board.calculateMovableRange(
+          tile.position,
+          selectedHero.actionPoints.move  // 直接使用剩余移动点数
+        )
+        board.setSelectableTiles(movablePositions)
       }
     }
   } else if (isSelected(tile.position)) {
@@ -199,48 +206,22 @@ const handleMouseLeave = () => {
 
 // 处理角色点击
 const handleHeroClick = (hero: Hero) => {
-  // 只能选择当前行动的角色，并且必须是友方角色
   if (hero.id === gameStore.turnState.currentHeroId && hero.isAlly) {
     heroStore.selectHero(hero.id)
-    // 只有在有移动点数的情况下才显示移动范围
     if (hero.actionPoints.move > 0) {
-      calculateMovableRange(hero.position, hero.stats.moveRange)
+      // 直接使用剩余移动点数作为移动范围
+      const movablePositions = board.calculateMovableRange(
+        hero.position, 
+        hero.actionPoints.move // 不再乘以 moveRange
+      )
+      board.setSelectableTiles(movablePositions)
     }
   }
 }
 
-// 更新移动范围计算函数
-const calculateMovableRange = (position: Position, moveRange: number) => {
-  const range: Position[] = []
-  
-  for (let dx = -moveRange; dx <= moveRange; dx++) {
-    for (let dy = -moveRange; dy <= moveRange; dy++) {
-      if (Math.abs(dx) + Math.abs(dy) <= moveRange) {
-        const newPos = {
-          x: position.x + dx,
-          y: position.y + dy
-        }
-        if (isValidMovePosition(newPos)) {
-          range.push(newPos)
-        }
-      }
-    }
-  }
-
-  board.setSelectableTiles(range)
-}
-
-// 检查位置是否可移动
-const isValidMovePosition = (position: Position): boolean => {
-  if (!board.isValidPosition(position)) return false
-  
-  const tile = board.tiles[position.y][position.x]
-  if (tile.type !== TileType.NORMAL) return false
-  
-  // 检查是否有其他角色占据
-  return !heroes.value.some(hero => 
-    hero.position.x === position.x && hero.position.y === position.y
-  )
+// 修改计算距离的方法（曼哈顿距离）
+const calculateDistance = (from: Position, to: Position): number => {
+  return Math.abs(from.x - to.x) + Math.abs(from.y - to.y)
 }
 
 // 添加回合结束按钮的处理函数

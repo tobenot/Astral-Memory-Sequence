@@ -11,7 +11,7 @@ export enum HeroTag {
   HEALER = 'healer'       // 治疗
 }
 
-export interface HeroStats {
+export interface CharacterStats {
   hp: number
   maxHp: number
   mp: number
@@ -19,7 +19,6 @@ export interface HeroStats {
   attack: number
   defense: number
   speed: number
-  moveRange: number
 }
 
 export interface Skill {
@@ -53,7 +52,7 @@ export interface Hero {
   level: number
   exp: number
   position: Position
-  stats: HeroStats
+  stats: CharacterStats
   skills: Skill[]       // 英雄特有技能
   status: StatusEffect[]
   isAlly: boolean
@@ -69,7 +68,7 @@ export interface StatusEffect {
   duration: number
   effect: {
     type: 'buff' | 'debuff'
-    stats: Partial<HeroStats>
+    stats: Partial<CharacterStats>
   }
 }
 

@@ -93,7 +93,6 @@ export const useCharacterStore = defineStore('character', {
         case CharacterType.ARCHER:
           stats.speed *= 1.2
           stats.attack *= 1.2
-          stats.moveRange += 1
           break
         case CharacterType.SUPPORT:
           stats.mp *= 1.2

@@ -42,7 +42,12 @@ export const useGameStore = defineStore('game', {
         : null
     },
 
-    canMove: (state) => state.actionPoints.move > 0,
+    canMove: (state) => {
+      const hero = state.turnState.currentHeroId 
+        ? useHeroStore().heroes.get(state.turnState.currentHeroId)
+        : null
+      return hero?.actionPoints.move && hero.actionPoints.move > 0
+    },
     canUseSkill: (state) => state.actionPoints.skill > 0,
     canUseItem: (state) => state.actionPoints.item > 0,
 

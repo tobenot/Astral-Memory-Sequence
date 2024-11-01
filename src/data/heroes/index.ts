@@ -54,8 +54,7 @@ export const heroes: Hero[] = [
       maxMp: 100,
       attack: 12,
       defense: 4,
-      speed: 4,
-      moveRange: 2
+      speed: 4
     },
     skills: [frostNova],
     status: [],
@@ -85,8 +84,7 @@ export const heroes: Hero[] = [
       maxMp: 60,
       attack: 15,
       defense: 6,
-      speed: 6,
-      moveRange: 3
+      speed: 6
     },
     skills: [windSlash],
     status: [],
@@ -116,8 +114,7 @@ export const heroes: Hero[] = [
       maxMp: 80,
       attack: 14,
       defense: 3,
-      speed: 5,
-      moveRange: 3
+      speed: 5
     },
     skills: [],
     status: [],
@@ -147,8 +144,7 @@ export const heroes: Hero[] = [
       maxMp: 120,
       attack: 8,
       defense: 5,
-      speed: 4,
-      moveRange: 2
+      speed: 4
     },
     skills: [],
     status: [],
