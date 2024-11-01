@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
-import type { Hero } from '@/types/character'
+import type { Hero, CharacterStats, StatusEffect } from '@/types/character'
 import type { Position } from '@/types/board'
 import { CharacterType } from '@/types/character'
+import { DEFAULT_ACTION_POINTS } from '@/types/character'
 
 interface CharacterState {
   characters: Map<string, Hero>
@@ -70,7 +71,9 @@ export const useCharacterStore = defineStore('character', {
         status: [],
         isAlly: params.isAlly,
         actionPoints: { ...DEFAULT_ACTION_POINTS },
-        maxActionPoints: { ...DEFAULT_ACTION_POINTS }
+        maxActionPoints: { ...DEFAULT_ACTION_POINTS },
+        avatar: '',
+        tags: []
       } as Hero
 
       this.characters.set(id, character)
