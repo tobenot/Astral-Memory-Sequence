@@ -6,7 +6,7 @@
       { 'active': isCurrentTurn }
     ]"
     :style="unitStyle"
-    @click="$emit('click')"
+    @click.stop="handleClick"
   >
     <div class="hero-portrait">
       <img :src="hero.avatar" :alt="hero.name">
@@ -42,12 +42,14 @@
 import { computed } from 'vue'
 import type { Hero } from '@/types/character'
 import { useGameStore } from '@/stores/game'
+import { useBoardStore } from '@/stores/board'
 
 const props = defineProps<{
   hero: Hero
 }>()
 
 const gameStore = useGameStore()
+const boardStore = useBoardStore()
 
 const isCurrentTurn = computed(() => 
   props.hero.id === gameStore.turnState.currentHeroId
@@ -58,6 +60,26 @@ const unitStyle = computed(() => ({
   '--unit-y': `${props.hero.position.y * 80}px`,
   '--unit-z': isCurrentTurn.value ? '1' : '0'
 }))
+
+const handleClick = () => {
+  console.log('Hero clicked:', props.hero.name)
+  
+  if (gameStore.selectedSkill) {
+    console.log('Has selected skill, simulating tile click')
+    const tile = {
+      position: props.hero.position,
+      type: boardStore.tiles[props.hero.position.y][props.hero.position.x].type
+    }
+    emit('tile-click', tile)
+  } else {
+    emit('click')
+  }
+}
+
+const emit = defineEmits<{
+  (e: 'click'): void
+  (e: 'tile-click', tile: { position: { x: number, y: number }, type: string }): void
+}>()
 </script>
 
 <style lang="scss" scoped>

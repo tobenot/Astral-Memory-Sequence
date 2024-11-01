@@ -279,67 +279,61 @@ export const useGameStore = defineStore('game', {
       this.selectedSkill = skill
     },
 
-    async useSkill(position: Position) {
-      if (!this.selectedSkill || !this.currentHero) return
-
-      const skill = this.selectedSkill
-      const hero = this.currentHero
-
-      // 检查是否可以使用技能
-      if (skill.currentCooldown > 0 || 
-          hero.stats.mp < skill.mpCost || 
-          hero.actionPoints.skill <= 0) {
-        return
-      }
-
-      // 根据技能类型处理目标
-      let target: SkillTarget
-      switch (skill.targetType) {
-        case 'single': {
-          const targetHero = this.findTargetAtPosition(position)
-          if (!targetHero) return
-          target = targetHero
-          break
-        }
-        case 'area': {
-          const targets = this.findTargetsInRange(position, skill.range)
-          if (targets.length === 0) return
-          target = targets
-          break
-        }
-        case 'self': {
-          target = hero
-          break
-        }
-        case 'position': {
-          target = position
-          break
-        }
-        default:
-          return
-      }
-
-      // 执行技能
-      await this.executeSkill(skill, hero, target)
-
-      // 消耗资源
-      hero.stats.mp -= skill.mpCost
-      hero.actionPoints.skill--
-      skill.currentCooldown = skill.cooldown
-
-      // 清理选择状态
-      this.selectSkill(null)
-      const boardStore = useBoardStore()
-      boardStore.clearSelection()
-    },
-
-    async executeSkill(skill: Skill, caster: Hero, target: SkillTarget) {
-      return new Promise<void>(resolve => {
-        setTimeout(() => {
-          skill.effect(caster, target)
-          resolve()
-        }, 500)
+    async useSkill(target: Hero | Hero[] | Position) {
+      const currentHero = this.currentHero
+      const selectedSkill = this.selectedSkill
+      
+      console.log('开始使用技能:', {
+        currentHero: currentHero?.name,
+        selectedSkill: selectedSkill?.name,
+        target
       })
+      
+      if (!currentHero || !selectedSkill || currentHero.actionPoints.skill <= 0) {
+        console.log('技能使用失败: 英雄/技能无效或没有行动点')
+        return false
+      }
+
+      // 检查MP是否足够
+      if (currentHero.stats.mp < selectedSkill.mpCost) {
+        console.log('技能使用失败: MP不足')
+        return false
+      }
+
+      try {
+        // 执行技能效果
+        console.log('执行技能效果前:', {
+          casterHP: currentHero.stats.hp,
+          casterMP: currentHero.stats.mp,
+          targetHP: ('stats' in target) ? target.stats.hp : null
+        })
+        
+        await selectedSkill.effect(currentHero, target)
+        
+        console.log('技能效果执行后:', {
+          casterHP: currentHero.stats.hp,
+          casterMP: currentHero.stats.mp,
+          targetHP: ('stats' in target) ? target.stats.hp : null
+        })
+        
+        // 消耗MP
+        currentHero.stats.mp -= selectedSkill.mpCost
+        
+        // 设置技能冷却
+        selectedSkill.currentCooldown = selectedSkill.cooldown
+        
+        // 消耗行动点
+        currentHero.actionPoints.skill--
+        
+        // 清除选中的技能
+        this.selectedSkill = null
+        
+        console.log('技能使用成功')
+        return true
+      } catch (error) {
+        console.error('技能使用失败:', error)
+        return false
+      }
     },
 
     findTargetAtPosition(position: Position): Hero | null {

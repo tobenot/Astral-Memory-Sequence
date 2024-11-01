@@ -71,6 +71,7 @@
           :key="hero.id"
           :hero="hero"
           @click="handleHeroClick(hero)"
+          @tile-click="handleTileClick"
         />
       </div>
     </div>
@@ -130,8 +131,27 @@ const handleTileClick = async (tile: Tile) => {
   
   // 如果有选中的技能
   if (gameStore.selectedSkill) {
+    console.log('当前选中技能:', gameStore.selectedSkill.name)
+    
+    // 检查目标位置是否在可选范围内
     if (isSelectable(tile.position)) {
-      await gameStore.useSkill(tile.position)
+      console.log('目标位置在可选范围内:', tile.position)
+      
+      // 获取目标
+      const target = getSkillTarget(tile)
+      console.log('获取到的技能目标:', target)
+      
+      if (target) {
+        // 使用技能
+        const result = await gameStore.useSkill(target)
+        console.log('技能使用结果:', result)
+        
+        // 清除选择状态
+        board.clearSelection()
+        return
+      }
+    } else {
+      console.log('目标位置不在可选范围内:', tile.position)
     }
     return
   }
@@ -268,6 +288,46 @@ const onTouch = (e: TouchEvent) => {
 
 const stopTouch = () => {
   isDragging.value = false
+}
+
+// 修改获取技能目标的辅助方法
+const getSkillTarget = (tile: Tile) => {
+  const gameStore = useGameStore()
+  const heroStore = useHeroStore()
+  const skill = gameStore.selectedSkill
+  
+  if (!skill) return null
+
+  console.log('技能类型:', skill.targetType)
+
+  switch (skill.targetType) {
+    case 'single':
+      // 对于单体技能，返回目标位置的英雄
+      const target = Array.from(heroStore.heroes.values()).find(
+        hero => hero.position.x === tile.position.x && 
+               hero.position.y === tile.position.y
+      )
+      console.log('找到的单体目标:', target)
+      return target
+    
+    case 'area':
+      // 对于范围技能，返回范围内的所有英雄
+      return Array.from(heroStore.heroes.values()).filter(hero => {
+        const distance = calculateDistance(tile.position, hero.position)
+        return distance <= (skill.aoeRange || 1)
+      })
+    
+    case 'position':
+      // 对于位置类技能，直接返回位置
+      return tile.position
+      
+    case 'self':
+      // 对于自身技能，返回施法者
+      return gameStore.currentHero
+      
+    default:
+      return null
+  }
 }
 </script>
 

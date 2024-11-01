@@ -26,17 +26,7 @@
               @click="handleSkipTurn"
               :disabled="!isCurrentHeroAlly"
             >
-              <span>跳过行动</span>
-            </button>
-            <button 
-              class="turn-btn end-turn-btn"
-              @click="handleEndTurn"
-              :disabled="!isCurrentHeroAlly || !gameStore.hasRemainingActions"
-            >
               <span>结束回合</span>
-              <span class="action-points" v-if="gameStore.hasRemainingActions">
-                (剩余行动点)
-              </span>
             </button>
           </div>
         </div>

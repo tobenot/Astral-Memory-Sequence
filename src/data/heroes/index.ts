@@ -32,11 +32,17 @@ const frostNova: Skill = {
   range: 2,
   type: 'active',
   targetType: 'area',
-  effect: (caster: Hero, target: SkillTarget) => {
+  effect: async (caster: Hero, target: SkillTarget) => {
     if (!Array.isArray(target)) return // 确保目标是英雄数组
+    
+    // 添加施法动画延迟
+    await new Promise(resolve => setTimeout(resolve, 300))
+    
     target.forEach(hero => {
       const damage = Math.max(1, caster.stats.attack * 1.2 - hero.stats.defense)
       hero.stats.hp = Math.max(0, hero.stats.hp - damage)
+      
+      // 添加减速效果
       hero.status.push({
         id: `frost_${Date.now()}`,
         name: '霜冻',
