@@ -1,5 +1,3 @@
-import type { Position } from '@/types/board'
-
 // 英雄标签，一个英雄可以有多个标签
 export enum HeroTag {
   WARRIOR = 'warrior',     // 战士
@@ -26,10 +24,14 @@ export interface CharacterStats {
   attack: number
   defense: number
   speed: number
+  stealth?: number
+  damageReduction?: number
+  damageReceived?: number
+  deathPrevention?: boolean
 }
 
 // 添加技能目标类型
-export type SkillTarget = Character | Character[] | Position
+export type SkillTarget = Hero | Hero[] | Position
 
 // 修改技能接口
 export interface Skill {
@@ -43,7 +45,7 @@ export interface Skill {
   range: number
   type: 'active' | 'passive'
   targetType: 'single' | 'area' | 'self' | 'position'
-  effect: (caster: Character, target: SkillTarget) => void | Promise<void>
+  effect: (caster: Hero, target: SkillTarget) => void | Promise<void>
   aoeRange?: number
 }
 
@@ -93,7 +95,7 @@ export interface StatusEffect {
   duration: number
   effect: {
     type: 'buff' | 'debuff'
-    stats: Partial<Record<keyof CharacterStats, number>>
+    stats: Partial<CharacterStats>
   }
 }
 
@@ -105,7 +107,4 @@ export const DEFAULT_ACTION_POINTS: ActionPoints = {
 }
 
 // 添加并导出 Position 类型
-export interface Position {
-  x: number
-  y: number
-}
+export type { Position } from '@/types/board'

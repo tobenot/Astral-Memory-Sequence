@@ -1,3 +1,5 @@
+import type { MapData } from '@/types/map'
+
 export interface Position {
   x: number
   y: number
