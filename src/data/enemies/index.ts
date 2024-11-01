@@ -1,8 +1,8 @@
-import type { Hero } from '@/types/character'
+import type { Hero, Skill, SkillTarget } from '@/types/character'
 import { HeroTag, DEFAULT_ACTION_POINTS } from '@/types/character'
 
 // 添加基础攻击技能
-const basicAttack = {
+const basicAttack: Skill = {
   id: 'basic_attack',
   name: '基础攻击',
   description: '近距离攻击',
@@ -11,9 +11,10 @@ const basicAttack = {
   cooldown: 0,
   currentCooldown: 0,
   range: 1,
-  type: 'active',
-  targetType: 'single',
-  effect: (caster, target) => {
+  type: 'active' as const,
+  targetType: 'single' as const,
+  effect: (caster: Hero, target: SkillTarget) => {
+    if (!('stats' in target)) return
     const damage = Math.max(1, caster.stats.attack - target.stats.defense)
     target.stats.hp = Math.max(0, target.stats.hp - damage)
   }

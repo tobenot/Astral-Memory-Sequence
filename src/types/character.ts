@@ -36,7 +36,8 @@ export interface Skill {
   range: number
   type: 'active' | 'passive'
   targetType: 'single' | 'area' | 'self' | 'position'
-  effect: (caster: Hero, target: SkillTarget) => void
+  effect: (caster: Hero, target: SkillTarget) => void | Promise<void>
+  aoeRange?: number
 }
 
 export interface ActionPoints {
@@ -64,6 +65,18 @@ export interface Hero {
   maxActionPoints: ActionPoints  // 添加最大行动点属性
 }
 
+// 添加状态效果的具体类型
+export interface StatusEffectStats {
+  hp?: number
+  maxHp?: number
+  mp?: number
+  maxMp?: number
+  attack?: number
+  defense?: number
+  speed?: number
+}
+
+// 完善StatusEffect接口
 export interface StatusEffect {
   id: string
   name: string
@@ -72,7 +85,7 @@ export interface StatusEffect {
   duration: number
   effect: {
     type: 'buff' | 'debuff'
-    stats: Partial<Record<keyof CharacterStats, number>>
+    stats: StatusEffectStats
   }
 }
 

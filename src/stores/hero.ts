@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { Hero, HeroStats, StatusEffect } from '@/types/character'
+import type { Hero, CharacterStats, StatusEffect } from '@/types/character'
 import type { Position } from '@/types/board'
 import { heroes } from '@/data/heroes'
 
@@ -70,12 +70,16 @@ export const useHeroStore = defineStore('hero', {
     },
 
     applyStatusEffects(hero: Hero) {
+      // 重置状态
+      const baseStats = { ...hero.stats }
+      
       // 应用所有状态效果
       hero.status.forEach(status => {
         Object.entries(status.effect.stats).forEach(([key, value]) => {
           if (typeof value === 'number') {
-            const statKey = key as keyof HeroStats
-            hero.stats[statKey] *= status.effect.type === 'buff' ? (1 + value) : (1 - value)
+            const statKey = key as keyof CharacterStats
+            hero.stats[statKey] = baseStats[statKey] * 
+              (status.effect.type === 'buff' ? (1 + value) : (1 - value))
           }
         })
       })
