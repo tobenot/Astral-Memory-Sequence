@@ -135,25 +135,18 @@ export const useCharacterStore = defineStore('character', {
     },
 
     applyStatusEffects(character: Hero) {
-      // 重置状态
-      character.stats = this.adjustStatsByType({
-        hp: 40,
-        maxHp: 40,
-        mp: 50,
-        maxMp: 50,
-        attack: 10,
-        defense: 5,
-        speed: 5,
-      }, character.type)
-
-      // 应用所有状态效果
       character.status.forEach(status => {
-        Object.entries(status.effect.stats).forEach(([key, value]) => {
-          if (typeof value === 'number') {
+        if (status.effect.stats) {
+          Object.entries(status.effect.stats).forEach(([key, value]) => {
             const statKey = key as keyof CharacterStats
-            character.stats[statKey] *= status.effect.type === 'buff' ? (1 + value) : (1 - value)
-          }
-        })
+            if (typeof value === 'number' && typeof character.stats[statKey] === 'number') {
+              const baseValue = character.stats[statKey] as number
+              character.stats[statKey as keyof CharacterStats] = status.effect.type === 'buff'
+                ? baseValue * (1 + (status.effect.stats[statKey] || 0))
+                : baseValue * (1 - (status.effect.stats[statKey] || 0))
+            }
+          })
+        }
       })
     },
 

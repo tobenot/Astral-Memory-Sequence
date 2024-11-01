@@ -92,8 +92,8 @@ const handleClick = () => {
 }
 
 const emit = defineEmits<{
-  (e: 'click'): void
-  (e: 'tile-click', tile: { position: { x: number, y: number }, type: string }): void
+  (e: 'click', hero: Hero): void
+  (e: 'tile-click', tile: Tile): void
 }>()
 
 const heroStore = useHeroStore()

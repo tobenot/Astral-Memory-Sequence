@@ -43,7 +43,7 @@
             @mouseup="handleTileMouseUp(tile)"
           >
             <div class="tile-content">
-              <div v-if="tile.unit" class="unit-indicator"></div>
+              <div v-if="tile.isOccupied" class="unit-indicator"></div>
               <div v-if="isSelected(tile.position)" class="selection-indicator"></div>
             </div>
           </div>

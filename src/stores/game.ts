@@ -24,6 +24,7 @@ interface GameState {
   selectedSkill: Skill | null
   isGameOver: boolean
   victoryDialogVisible: boolean
+  heroes: Map<string, Hero>
 }
 
 export const useGameStore = defineStore('game', {
@@ -42,7 +43,8 @@ export const useGameStore = defineStore('game', {
     actionPoints: { ...DEFAULT_ACTION_POINTS },
     selectedSkill: null,
     isGameOver: false,
-    victoryDialogVisible: false
+    victoryDialogVisible: false,
+    heroes: new Map<string, Hero>()
   }),
 
   getters: {
@@ -437,7 +439,7 @@ export const useGameStore = defineStore('game', {
       const heroStore = useHeroStore()
       const boardStore = useBoardStore()
 
-      // 重���英雄状态
+      // 重英雄状态
       heroStore.$reset()
       
       // 重新初始化棋盘和地图

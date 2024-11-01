@@ -88,8 +88,9 @@ export const useHeroStore = defineStore('hero', {
         Object.entries(status.effect.stats).forEach(([key, value]) => {
           if (typeof value === 'number') {
             const statKey = key as keyof CharacterStats
-            hero.stats[statKey] = baseStats[statKey] * 
-              (status.effect.type === 'buff' ? (1 + value) : (1 - value))
+            hero.stats[statKey as keyof CharacterStats] = 
+              (baseStats[statKey as keyof CharacterStats] || 0) * 
+              (1 + (status.effect.stats[statKey as keyof CharacterStats] || 0))
           }
         })
       })

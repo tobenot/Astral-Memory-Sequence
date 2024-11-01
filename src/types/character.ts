@@ -1,3 +1,6 @@
+// 在文件顶部添加导入
+import type { Position } from './board'
+
 // 英雄标签，一个英雄可以有多个标签
 export enum HeroTag {
   WARRIOR = 'warrior',     // 战士
@@ -73,6 +76,7 @@ export interface Hero {
   isAlly: boolean
   actionPoints: ActionPoints
   maxActionPoints: ActionPoints
+  type: CharacterType
 }
 
 // 添加状态效果的具体类型
@@ -106,5 +110,5 @@ export const DEFAULT_ACTION_POINTS: ActionPoints = {
   item: 1
 }
 
-// 添加并导出 Position 类型
-export type { Position } from '@/types/board'
+// 在文件末尾，导出 Position 类型
+export type { Position }

@@ -21,10 +21,10 @@ export const tutorialMap: MapData = {
     [2, 2, 2, 2, 2, 2, 2, 2],
   ].map(row => row.map(cell => {
     switch(cell) {
-      case 0: return TileType.NORMAL
-      case 1: return TileType.VOID  
-      case 2: return TileType.OBSTACLE
-      default: return TileType.NORMAL
+      case 0: return TileType.GROUND
+      case 1: return TileType.WATER
+      case 2: return TileType.WALL
+      default: return TileType.GROUND
     }
   })),
   spawnPoints: [

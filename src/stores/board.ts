@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import type { BoardState, Position, Tile } from '@/types/board'
 import type { MapData } from '@/types/map'
-import { TileType } from '@/types/board'
+import { TileType, createTile, TILE_TYPE_CONFIG } from '@/types/board'
 import { useHeroStore } from './hero'
 import type { Hero } from '@/types/character'
 
@@ -19,10 +19,9 @@ export const useBoardStore = defineStore('board', {
   actions: {
     initializeBoard() {
       this.tiles = Array(this.height).fill(null).map((_, y) => 
-        Array(this.width).fill(null).map((_, x) => ({
-          position: { x, y },
-          type: TileType.NORMAL
-        }))
+        Array(this.width).fill(null).map((_, x) => 
+          createTile(TileType.GROUND, { x, y })
+        )
       )
     },
 
@@ -33,10 +32,9 @@ export const useBoardStore = defineStore('board', {
       
       // 根据地图数据初始化棋盘
       this.tiles = mapData.terrain.map((row, y) => 
-        row.map((type, x) => ({
-          position: { x, y },
-          type: type
-        }))
+        row.map((type, x) => 
+          createTile(type, { x, y })
+        )
       )
 
       // 清除之前的状态
@@ -55,7 +53,8 @@ export const useBoardStore = defineStore('board', {
 
     setTileType(position: Position, type: TileType) {
       if (this.isValidPosition(position)) {
-        this.tiles[position.y][position.x].type = type
+        const tile = this.tiles[position.y][position.x]
+        this.tiles[position.y][position.x] = createTile(type, position)
       }
     },
 
@@ -123,7 +122,7 @@ export const useBoardStore = defineStore('board', {
       if (!this.isValidPosition(position)) return false
       
       const tile = this.tiles[position.y][position.x]
-      if (tile.type !== TileType.NORMAL) return false
+      if (!tile.isWalkable) return false
       
       // 检查是否有其他角色占据
       const heroStore = useHeroStore()

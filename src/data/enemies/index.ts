@@ -1,5 +1,5 @@
 import type { Hero, Skill, SkillTarget } from '@/types/character'
-import { HeroTag, DEFAULT_ACTION_POINTS } from '@/types/character'
+import { HeroTag, DEFAULT_ACTION_POINTS, CharacterType } from '@/types/character'
 import { useHeroStore } from '@/stores/hero'
 
 // 基础技能
@@ -126,6 +126,7 @@ export const enemies: Hero[] = [
     avatar: '/enemies/shadow_assassin/avatar.png',
     portrait: '/enemies/shadow_assassin/portrait.png',
     tags: [HeroTag.ASSASSIN],
+    type: CharacterType.WARRIOR,
     level: 1,
     exp: 0,
     position: { x: 0, y: 0 },
@@ -156,6 +157,7 @@ export const enemies: Hero[] = [
     avatar: '/enemies/dark_mage/avatar.png',
     portrait: '/enemies/dark_mage/portrait.png',
     tags: [HeroTag.MAGE],
+    type: CharacterType.MAGE,
     level: 1,
     exp: 0,
     position: { x: 0, y: 0 },
@@ -186,6 +188,7 @@ export const enemies: Hero[] = [
     avatar: '/enemies/corrupted_knight/avatar.png',
     portrait: '/enemies/corrupted_knight/portrait.png',
     tags: [HeroTag.WARRIOR],
+    type: CharacterType.WARRIOR,
     level: 1,
     exp: 0,
     position: { x: 0, y: 0 },
@@ -216,6 +219,7 @@ export const enemies: Hero[] = [
     avatar: '/enemies/death_prophet/avatar.png',
     portrait: '/enemies/death_prophet/portrait.png',
     tags: [HeroTag.MAGE, HeroTag.SUPPORT],
+    type: CharacterType.MAGE,
     level: 1,
     exp: 0,
     position: { x: 0, y: 0 },
