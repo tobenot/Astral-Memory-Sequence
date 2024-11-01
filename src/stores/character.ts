@@ -56,7 +56,6 @@ export const useCharacterStore = defineStore('character', {
         attack: 10,
         defense: 5,
         speed: 5,
-        moveRange: 2
       }
 
       const character = {
@@ -73,7 +72,10 @@ export const useCharacterStore = defineStore('character', {
         actionPoints: { ...DEFAULT_ACTION_POINTS },
         maxActionPoints: { ...DEFAULT_ACTION_POINTS },
         avatar: '',
-        tags: []
+        tags: [],
+        title: '',
+        description: '',
+        portrait: ''
       } as Hero
 
       this.characters.set(id, character)
@@ -142,7 +144,6 @@ export const useCharacterStore = defineStore('character', {
         attack: 10,
         defense: 5,
         speed: 5,
-        moveRange: 2
       }, character.type)
 
       // 应用所有状态效果
