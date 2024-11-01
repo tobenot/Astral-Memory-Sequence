@@ -26,7 +26,6 @@ export interface CharacterStats {
   attack: number
   defense: number
   speed: number
-  moveRange: number
 }
 
 // 添加技能目标类型

@@ -437,7 +437,7 @@ export const useGameStore = defineStore('game', {
       const heroStore = useHeroStore()
       const boardStore = useBoardStore()
 
-      // 重置英雄状态
+      // 重���英雄状态
       heroStore.$reset()
       
       // 重新初始化棋盘和地图
@@ -535,6 +535,25 @@ export const useGameStore = defineStore('game', {
         return true
       }
       return false
+    },
+
+    regenerateMana(hero: Hero) {
+      // 每回合回复 30% 最大蓝量
+      const regenAmount = Math.floor(hero.stats.maxMp * 0.3)
+      hero.stats.mp = Math.min(hero.stats.maxMp, hero.stats.mp + regenAmount)
+      console.log(`[Mana] ${hero.name} 回复了 ${regenAmount} 点魔法值，当前: ${hero.stats.mp}/${hero.stats.maxMp}`)
+    },
+
+    startHeroTurn(heroId: string) {
+      // ... 现有的回合开始逻辑 ...
+      
+      // 在回合开始时回复魔法值
+      const hero = this.heroes.get(heroId)
+      if (hero) {
+        this.regenerateMana(hero)
+      }
+      
+      // ... 其他回合开始逻辑 ...
     }
   }
 }) 

@@ -24,7 +24,10 @@
       <div class="hero-mp-bar">
         <div 
           class="mp-fill"
-          :style="{ width: `${(hero.stats.mp / hero.stats.maxMp) * 100}%` }"
+          :style="{ 
+            width: `${(hero.stats.mp / hero.stats.maxMp) * 100}%`,
+            transition: 'width 0.5s ease-out'
+          }"
         ></div>
       </div>
     </div>
@@ -147,7 +150,11 @@ const isDead = computed(() => heroStore.deadHeroes.has(props.hero.id))
     .mp-fill {
       height: 100%;
       background: #2e86de;
-      transition: width 0.3s ease;
+      transition: width 0.5s ease-out;
+      
+      &.regenerating {
+        animation: pulse 1s ease-in-out;
+      }
     }
   }
 
@@ -212,6 +219,18 @@ const isDead = computed(() => heroStore.deadHeroes.has(props.hero.id))
       opacity: 0;
       transition: opacity 3s ease;
     }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
   }
 }
 </style> 

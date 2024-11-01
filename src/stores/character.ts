@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
-import type { Character, CharacterStats, StatusEffect, Hero } from '@/types/character'
+import type { Hero } from '@/types/character'
 import type { Position } from '@/types/board'
 import { CharacterType } from '@/types/character'
 
 interface CharacterState {
-  characters: Map<string, Character>
+  characters: Map<string, Hero>
   selectedCharacterId: string | null
   activeCharacterId: string | null
 }
@@ -17,23 +17,23 @@ export const useCharacterStore = defineStore('character', {
   }),
 
   getters: {
-    selectedCharacter: (state): Character | null => {
+    selectedCharacter: (state): Hero | null => {
       return state.selectedCharacterId 
         ? state.characters.get(state.selectedCharacterId) ?? null 
         : null
     },
 
-    activeCharacter: (state): Character | null => {
+    activeCharacter: (state): Hero | null => {
       return state.activeCharacterId 
         ? state.characters.get(state.activeCharacterId) ?? null 
         : null
     },
 
-    allies: (state): Character[] => {
+    allies: (state): Hero[] => {
       return Array.from(state.characters.values()).filter(char => char.isAlly)
     },
 
-    enemies: (state): Character[] => {
+    enemies: (state): Hero[] => {
       return Array.from(state.characters.values()).filter(char => !char.isAlly)
     }
   },
@@ -44,7 +44,7 @@ export const useCharacterStore = defineStore('character', {
       type: CharacterType
       position: Position
       isAlly: boolean
-    }): Character {
+    }): Hero {
       const id = `char_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       
       const baseStats: CharacterStats = {
@@ -129,7 +129,7 @@ export const useCharacterStore = defineStore('character', {
       }
     },
 
-    applyStatusEffects(character: Character) {
+    applyStatusEffects(character: Hero) {
       // 重置状态
       character.stats = this.adjustStatsByType({
         hp: 100,

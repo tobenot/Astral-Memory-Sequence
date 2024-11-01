@@ -2,11 +2,13 @@ import type { Hero, Skill } from '@/types/character'
 import type { Position } from '@/types/board'
 import { useBoardStore } from '@/stores/board'
 import { useHeroStore } from '@/stores/hero'
+import { useGameStore } from '@/stores/game'
 
 export class EnemyAI {
   private hero: Hero
   private boardStore = useBoardStore()
   private heroStore = useHeroStore()
+  private gameStore = useGameStore()
 
   constructor(hero: Hero) {
     this.hero = hero
@@ -14,6 +16,9 @@ export class EnemyAI {
 
   async executeTurn(): Promise<void> {
     console.log(`[EnemyAI] ${this.hero.name} 开始执行回合`)
+    
+    // 回复魔法值
+    this.gameStore.regenerateMana(this.hero)
     
     // 1. 寻找最近的敌人
     const target = this.findNearestTarget()
