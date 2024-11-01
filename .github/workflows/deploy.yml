@@ -2,12 +2,11 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]  # 根据你的默认分支修改
+    branches: [ main ]
     
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # 添加权限配置
     permissions:
       contents: write
     
@@ -25,11 +24,15 @@ jobs:
         
       - name: Build
         run: npm run build
-        
+        env:
+          NODE_ENV: production
+          
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist
           branch: gh-pages
-          # 使用 GITHUB_TOKEN
+          clean: true
+          clean-exclude: |
+            CNAME
           token: ${{ secrets.GITHUB_TOKEN }}
