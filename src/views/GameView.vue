@@ -19,14 +19,18 @@ import { onMounted, computed } from 'vue'
 import GameLayout from '@/components/layout/GameLayout.vue'
 import GameBoard from '@/components/game/GameBoard.vue'
 import { useBoardStore } from '@/stores/board'
+import { useGameStore } from '@/stores/game'
 import { tutorialMap } from '@/data/maps'
 
 const boardStore = useBoardStore()
+const gameStore = useGameStore()
 const currentMap = computed(() => boardStore.currentMap)
 
 onMounted(() => {
   // 加载教程地图
   boardStore.loadMap(tutorialMap)
+  // 开始游戏，触发角色入场
+  gameStore.startGame()
 })
 </script>
 

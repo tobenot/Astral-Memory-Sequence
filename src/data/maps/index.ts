@@ -1,5 +1,6 @@
 import type { MapData } from '@/types/map'
 import { TileType } from '@/types/board'
+import { SpawnPointType } from '@/types/map'
 
 export const tutorialMap: MapData = {
   id: 'tutorial',
@@ -8,6 +9,7 @@ export const tutorialMap: MapData = {
   height: 8,
   difficulty: 1,
   description: '一片适合初学者的平原地形。',
+  maxTeamSize: 4,
   terrain: [
     [1, 1, 1, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 1],
@@ -25,20 +27,18 @@ export const tutorialMap: MapData = {
       default: return TileType.NORMAL
     }
   })),
-  startPositions: {
-    allies: [
-      { x: 1, y: 1 },
-      { x: 2, y: 1 },
-      { x: 1, y: 2 },
-      { x: 2, y: 2 }
-    ],
-    enemies: [
-      { x: 5, y: 5 },
-      { x: 6, y: 5 },
-      { x: 5, y: 6 },
-      { x: 6, y: 6 }
-    ]
-  },
+  spawnPoints: [
+    // 友方出生点
+    { position: { x: 1, y: 1 }, type: SpawnPointType.ALLY, isOccupied: false },
+    { position: { x: 2, y: 1 }, type: SpawnPointType.ALLY, isOccupied: false },
+    { position: { x: 1, y: 2 }, type: SpawnPointType.ALLY, isOccupied: false },
+    { position: { x: 2, y: 2 }, type: SpawnPointType.ALLY, isOccupied: false },
+    // 敌方出生点
+    { position: { x: 5, y: 5 }, type: SpawnPointType.ENEMY, isOccupied: false },
+    { position: { x: 6, y: 5 }, type: SpawnPointType.ENEMY, isOccupied: false },
+    { position: { x: 5, y: 6 }, type: SpawnPointType.ENEMY, isOccupied: false },
+    { position: { x: 6, y: 6 }, type: SpawnPointType.ENEMY, isOccupied: false },
+  ],
   rewards: {
     exp: 100
   }
