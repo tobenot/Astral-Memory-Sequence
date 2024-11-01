@@ -1,3 +1,5 @@
+import { ref } from 'vue'
+
 interface TouchInfo {
   startX: number
   startY: number

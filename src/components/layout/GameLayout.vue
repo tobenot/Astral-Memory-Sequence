@@ -16,7 +16,7 @@
       <div class="board-area">
         <slot name="board"></slot>
       </div>
-      <aside class="info-panel">
+      <aside class="info-panel" :class="{ 'show': showInfoPanel }">
         <slot name="character-info"></slot>
         <slot name="skill-panel"></slot>
       </aside>
@@ -103,8 +103,12 @@ const handleTouchEnd = () => {
       bottom: 0;
       width: 280px;
       border-radius: 0;
-      transform: translateX(v-bind(showInfoPanel ? '0' : '100%'));
+      transform: translateX(100%);
       z-index: 100;
+
+      &.show {
+        transform: translateX(0);
+      }
     }
 
     @include respond-to('mobile') {
