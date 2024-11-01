@@ -3,7 +3,10 @@
     class="hero-unit"
     :class="[
       hero.isAlly ? 'ally' : 'enemy',
-      { 'active': isCurrentTurn }
+      { 
+        'active': isCurrentTurn,
+        'dead': isDead
+      }
     ]"
     :style="unitStyle"
     @click.stop="handleClick"
@@ -43,6 +46,7 @@ import { computed } from 'vue'
 import type { Hero } from '@/types/character'
 import { useGameStore } from '@/stores/game'
 import { useBoardStore } from '@/stores/board'
+import { useHeroStore } from '@/stores/hero'
 
 const props = defineProps<{
   hero: Hero
@@ -62,10 +66,18 @@ const unitStyle = computed(() => ({
 }))
 
 const handleClick = () => {
-  console.log('Hero clicked:', props.hero.name)
+  const heroStore = useHeroStore()
+  
+  // 如果单位已死亡，不处理点击事件
+  if (heroStore.deadHeroes.has(props.hero.id)) {
+    console.log(`[Click] Ignoring click on dead hero ${props.hero.name}`)
+    return
+  }
+
+  console.log(`[Click] Hero clicked: ${props.hero.name}`)
   
   if (gameStore.selectedSkill) {
-    console.log('Has selected skill, simulating tile click')
+    console.log('[Click] Has selected skill, simulating tile click')
     const tile = {
       position: props.hero.position,
       type: boardStore.tiles[props.hero.position.y][props.hero.position.x].type
@@ -80,6 +92,9 @@ const emit = defineEmits<{
   (e: 'click'): void
   (e: 'tile-click', tile: { position: { x: number, y: number }, type: string }): void
 }>()
+
+const heroStore = useHeroStore()
+const isDead = computed(() => heroStore.deadHeroes.has(props.hero.id))
 </script>
 
 <style lang="scss" scoped>
@@ -92,7 +107,7 @@ const emit = defineEmits<{
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: all 0.3s ease;
+  transition: all 3s ease;
   z-index: var(--unit-z);
 
   .hero-portrait {
@@ -173,6 +188,29 @@ const emit = defineEmits<{
     
     .hero-portrait {
       box-shadow: 0 0 15px rgba(133, 199, 222, 0.8);
+    }
+  }
+
+  &.dead {
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+    pointer-events: none;
+    transition: all 3s ease;
+    
+    .hero-portrait {
+      filter: grayscale(100%);
+      border-color: rgba(255, 255, 255, 0.3) !important;
+      transition: all 3s ease;
+    }
+
+    .hero-info {
+      opacity: 0;
+      transition: opacity 3s ease;
+    }
+
+    .status-effects {
+      opacity: 0;
+      transition: opacity 3s ease;
     }
   }
 }

@@ -12,6 +12,7 @@ export const useBoardStore = defineStore('board', {
     tiles: [],
     highlightedTiles: [],
     selectableTiles: [],
+    selectedTile: undefined,
     currentMap: null
   }),
 
@@ -129,6 +130,16 @@ export const useBoardStore = defineStore('board', {
       return !Array.from(heroStore.heroes.values()).some((hero: Hero) => 
         hero.position.x === position.x && hero.position.y === position.y
       )
+    },
+
+    $reset() {
+      this.width = 8
+      this.height = 8
+      this.tiles = []
+      this.highlightedTiles = []
+      this.selectableTiles = []
+      this.selectedTile = undefined
+      this.currentMap = null
     }
   }
 }) 

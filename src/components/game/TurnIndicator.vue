@@ -4,21 +4,23 @@
       回合 {{ currentTurn }}
     </div>
     <div class="turn-order">
-      <div 
-        v-for="order in turnState.turnOrder" 
-        :key="order.heroId"
-        class="hero-order"
-        :class="{
-          'active': order.heroId === turnState.currentHeroId,
-          'ally': isAlly(order.heroId)
-        }"
-      >
-        <img 
-          :src="getHeroAvatar(order.heroId)" 
-          :alt="getHeroName(order.heroId)"
-          :title="getHeroName(order.heroId)"
+      <TransitionGroup name="hero-order">
+        <div 
+          v-for="order in turnState.turnOrder" 
+          :key="order.heroId"
+          class="hero-order"
+          :class="{
+            'active': order.heroId === turnState.currentHeroId,
+            'ally': isAlly(order.heroId)
+          }"
         >
-      </div>
+          <img 
+            :src="getHeroAvatar(order.heroId)" 
+            :alt="getHeroName(order.heroId)"
+            :title="getHeroName(order.heroId)"
+          >
+        </div>
+      </TransitionGroup>
     </div>
     <div v-if="currentHero" class="action-points">
       <div class="point move" :class="{ 'used': !currentHero.actionPoints.move }">
@@ -79,6 +81,7 @@ const isAlly = (heroId: string) => {
     gap: 0.5rem;
     padding: 0.5rem;
     overflow-x: auto;
+    min-height: 48px;
 
     .hero-order {
       width: 40px;
@@ -126,6 +129,25 @@ const isAlly = (heroId: string) => {
         background: var(--columbia-blue);
       }
     }
+  }
+
+  .hero-order-enter-active,
+  .hero-order-leave-active {
+    transition: all 3s ease;
+  }
+
+  .hero-order-enter-from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  .hero-order-leave-to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .hero-order-move {
+    transition: all 3s ease;
   }
 }
 </style> 

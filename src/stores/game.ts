@@ -11,6 +11,8 @@ import type { ActionPoints } from '@/types/character'
 import { enemies } from '@/data/enemies'
 import { EnemyAI } from '@/game/ai/EnemyAI'
 import type { Skill, SkillTarget } from '@/types/character'
+import { tutorialMap } from '@/data/maps'
+import type { Hero, Position } from '@/types/character'
 
 interface GameState {
   currentTurn: number
@@ -20,6 +22,8 @@ interface GameState {
   turnState: TurnState
   actionPoints: ActionPoint
   selectedSkill: Skill | null
+  isGameOver: boolean
+  victoryDialogVisible: boolean
 }
 
 export const useGameStore = defineStore('game', {
@@ -36,7 +40,9 @@ export const useGameStore = defineStore('game', {
       isProcessing: false
     },
     actionPoints: { ...DEFAULT_ACTION_POINTS },
-    selectedSkill: null
+    selectedSkill: null,
+    isGameOver: false,
+    victoryDialogVisible: false
   }),
 
   getters: {
@@ -68,23 +74,43 @@ export const useGameStore = defineStore('game', {
     startGame() {
       this.isGameStarted = true
       this.currentTurn = 1
+      this.isGameOver = false
+      this.victoryDialogVisible = false
+      
+      // 清除现有状态
+      const heroStore = useHeroStore()
+      heroStore.heroes.clear()
+      heroStore.deadHeroes.clear()
+      this.playerTeam = []
+
+      // 生成单位
       this.spawnHeroes()
       this.spawnEnemies()
+      
+      // 初始化回合顺序
       this.initializeTurnOrder()
     },
 
     initializeTurnOrder() {
       const heroStore = useHeroStore()
-      const allHeroes = Array.from(heroStore.heroes.values())
+      const aliveHeroes = Array.from(heroStore.heroes.values())
+        .filter(hero => !heroStore.deadHeroes.has(hero.id))
+      
+      console.log(`[Turn Order] Initializing turn order with ${aliveHeroes.length} alive heroes`)
       
       // 计算行动顺序
-      this.turnState.turnOrder = allHeroes.map(hero => ({
+      this.turnState.turnOrder = aliveHeroes.map(hero => ({
         heroId: hero.id,
-        initiative: hero.stats.speed + Math.random() * 20 // 添加随机性
+        initiative: hero.stats.speed + Math.random() * 20
       })).sort((a, b) => b.initiative - a.initiative)
 
       // 设置第一个行动的角色
-      this.startNewHeroTurn(this.turnState.turnOrder[0].heroId)
+      if (this.turnState.turnOrder.length > 0) {
+        this.startNewHeroTurn(this.turnState.turnOrder[0].heroId)
+      } else {
+        console.log('[Turn Order] No alive heroes remaining')
+        // 可以在这里处理游戏结束的情况
+      }
     },
 
     async startNewHeroTurn(heroId: string) {
@@ -92,8 +118,15 @@ export const useGameStore = defineStore('game', {
       const boardStore = useBoardStore()
       const hero = heroStore.heroes.get(heroId)
       
-      if (!hero) return
+      // 检查英雄是否存在且未死亡
+      if (!hero || heroStore.deadHeroes.has(heroId)) {
+        console.log(`[Turn] Skipping turn for dead hero ${heroId}`)
+        // 跳过死亡单位的回合
+        this.endHeroTurn()
+        return
+      }
       
+      console.log(`[Turn] Starting turn for ${hero.name}`)
       this.turnState.isProcessing = true
       this.turnState.currentHeroId = heroId
       this.turnState.phase = TurnPhase.ACTION
@@ -145,7 +178,7 @@ export const useGameStore = defineStore('game', {
         }
       })
 
-      // 防止回合结束时重复触发
+      // 防止合结束时重复触发
       if (this.turnState.isProcessing) return
       
       this.turnState.isProcessing = true
@@ -183,6 +216,29 @@ export const useGameStore = defineStore('game', {
       // 检查是否还有任何可用的行动点
       const hasRemainingActions = Object.values(hero.actionPoints).some(points => points > 0)
       
+      const boardStore = useBoardStore()
+      const heroStore = useHeroStore()
+
+      // 如果还有移动点数，重新计算并显示移动范围
+      if (type === 'move') {
+        if (hero.actionPoints.move > 0) {
+          console.log(`[Action] Hero has ${hero.actionPoints.move} move points remaining`)
+          // 重新计算移动范围
+          const movablePositions = boardStore.calculateMovableRange(
+            hero.position,
+            hero.actionPoints.move
+          )
+          boardStore.setSelectableTiles(movablePositions)
+          // 保持英雄选中状态
+          heroStore.selectHero(hero.id)
+        } else {
+          // 如果没有移动点数了，清除移动范围高亮
+          console.log(`[Action] No more move points, clearing movement range`)
+          boardStore.clearSelection()
+        }
+      }
+      
+      // 只有当没有任何行动点时才结束回合
       if (!hasRemainingActions && !this.turnState.isProcessing) {
         setTimeout(() => {
           this.endHeroTurn()
@@ -198,8 +254,13 @@ export const useGameStore = defineStore('game', {
       
       // 获取所有友方出生点
       const allySpawnPoints = boardStore.currentMap?.spawnPoints.filter(
-        point => point.type === SpawnPointType.ALLY && !point.isOccupied
+        (point: SpawnPoint) => point.type === SpawnPointType.ALLY && !point.isOccupied
       ) || []
+
+      // 重置所有出生点状态
+      boardStore.currentMap?.spawnPoints.forEach(point => {
+        point.isOccupied = false
+      })
 
       // 初始化玩家队伍（使用前4个英雄）
       const teamHeroes = heroes.slice(0, 4)
@@ -208,8 +269,21 @@ export const useGameStore = defineStore('game', {
       teamHeroes.forEach((hero, index) => {
         const spawnPoint = allySpawnPoints[index]
         if (spawnPoint) {
-          this.spawnHero(hero, spawnPoint, heroStore)
+          // 创建全新的英雄实例
+          const newHero = {
+            ...hero,
+            position: { ...spawnPoint.position },
+            stats: { ...hero.stats },
+            actionPoints: { ...DEFAULT_ACTION_POINTS },
+            status: [],
+            skills: hero.skills.map(skill => ({
+              ...skill,
+              currentCooldown: 0
+            }))
+          }
+          heroStore.addHero(newHero)
           this.playerTeam.push(hero.id)
+          spawnPoint.isOccupied = true
         }
       })
     },
@@ -333,6 +407,122 @@ export const useGameStore = defineStore('game', {
                         Math.abs(hero.position.y - center.y)
         return distance <= range
       })
+    },
+
+    handleVictory() {
+      console.log('[Game] Victory condition met, showing victory dialog')
+      this.isGameOver = true
+      this.victoryDialogVisible = true
+    },
+
+    restartGame() {
+      // 重置游戏状态
+      this.currentTurn = 1
+      this.isGameStarted = false
+      this.isPaused = false
+      this.playerTeam = []
+      this.turnState = {
+        currentHeroId: null,
+        remainingActions: 0,
+        turnOrder: [],
+        phase: TurnPhase.PREPARE,
+        isProcessing: false
+      }
+      this.selectedSkill = null
+      this.victoryDialogVisible = false
+      this.isGameOver = false
+      this.actionPoints = { ...DEFAULT_ACTION_POINTS }
+
+      // 重置所有商店状态
+      const heroStore = useHeroStore()
+      const boardStore = useBoardStore()
+
+      // 重置英雄状态
+      heroStore.$reset()
+      
+      // 重新初始化棋盘和地图
+      boardStore.$reset()
+      boardStore.initializeBoard()
+      
+      // 重新加载初始地图
+      boardStore.loadMap(tutorialMap)
+      
+      // 重新开始游戏
+      this.startGame()
+    },
+
+    initializeGame() {
+      const heroStore = useHeroStore()
+      const boardStore = useBoardStore()
+      const currentMap = boardStore.currentMap
+      
+      if (!currentMap) return
+
+      // 清除现有的英雄
+      heroStore.heroes.clear()
+      heroStore.deadHeroes.clear()
+
+      // 重新添加玩家英雄
+      heroes.forEach((hero, index) => {
+        const spawnPoint = currentMap.spawnPoints.find(
+          point => point.type === SpawnPointType.ALLY && !point.isOccupied
+        )
+        
+        if (spawnPoint) {
+          const newHero = { ...hero }
+          newHero.position = { ...spawnPoint.position }
+          newHero.stats = { ...hero.stats } // 深拷贝状态
+          newHero.actionPoints = { ...DEFAULT_ACTION_POINTS }
+          newHero.status = []
+          heroStore.addHero(newHero)
+          spawnPoint.isOccupied = true
+        }
+      })
+
+      // 重新添加敌人
+      currentMap.enemies.forEach(enemy => {
+        const enemyTemplate = enemies.find(e => e.id === enemy.id)
+        if (enemyTemplate) {
+          const newEnemy = { ...enemyTemplate }
+          newEnemy.position = { ...enemy.position }
+          newEnemy.stats = { ...enemyTemplate.stats } // 深拷贝状态
+          newEnemy.actionPoints = { ...DEFAULT_ACTION_POINTS }
+          newEnemy.status = []
+          heroStore.addHero(newEnemy)
+        }
+      })
+
+      // 初始化回合顺序
+      this.initializeTurnOrder()
+    },
+
+    // 添加新方法
+    removeFromTurnOrder(heroId: string) {
+      console.log(`[Turn Order] Removing hero ${heroId} from turn order`)
+      
+      // 找到当前单位在回合顺序中的位置
+      const currentIndex = this.turnState.turnOrder.findIndex(t => t.heroId === heroId)
+      if (currentIndex === -1) return
+
+      // 从回合顺序中移除
+      this.turnState.turnOrder = this.turnState.turnOrder.filter(t => t.heroId !== heroId)
+      
+      console.log(`[Turn Order] Updated turn order:`, 
+        this.turnState.turnOrder.map(t => t.heroId))
+
+      // 如果当前没有任何单位的回合，开始下一个回合
+      if (this.turnState.turnOrder.length === 0) {
+        console.log(`[Turn Order] No units remaining in turn order`)
+        return
+      }
+
+      // 如果移除的是当前行动的单位，立即开始下一个单位的回合
+      if (this.turnState.currentHeroId === heroId) {
+        const nextIndex = currentIndex % this.turnState.turnOrder.length
+        const nextHeroId = this.turnState.turnOrder[nextIndex].heroId
+        console.log(`[Turn Order] Starting next hero's turn: ${nextHeroId}`)
+        this.startNewHeroTurn(nextHeroId)
+      }
     }
   }
 }) 

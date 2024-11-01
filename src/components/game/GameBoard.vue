@@ -128,6 +128,7 @@ const isHovered = (position: Position) => {
 // 事件处理
 const handleTileClick = async (tile: Tile) => {
   const gameStore = useGameStore()
+  const heroStore = useHeroStore()
   
   // 如果有选中的技能
   if (gameStore.selectedSkill) {
@@ -154,39 +155,23 @@ const handleTileClick = async (tile: Tile) => {
       console.log('目标位置不在可选范围内:', tile.position)
     }
     return
-  }
-
-  const selectedHero = heroStore.selectedHero
-  
-  if (selectedHero && isSelectable(tile.position)) {
-    const distance = calculateDistance(selectedHero.position, tile.position)
-    // 检查是否有足够的移动点数
-    if (selectedHero.actionPoints.move >= distance) {
-      // 移动英雄
-      heroStore.moveHero(selectedHero.id, tile.position)
-      // 消耗移动点数
-      selectedHero.actionPoints.move -= distance
-      // 清除选择状态
+  } else {
+    // 移动逻辑
+    const selectedHero = heroStore.selectedHero
+    if (selectedHero && isSelectable(tile.position)) {
+      const distance = calculateDistance(selectedHero.position, tile.position)
+      if (selectedHero.actionPoints.move >= distance) {
+        // 移动英雄
+        heroStore.moveHero(selectedHero.id, tile.position)
+        // 消耗移动点数
+        gameStore.useActionPoint('move')
+        // 不再清除选择状态，让 useActionPoint 处理
+      }
+    } else if (isSelected(tile.position)) {
+      // 如果点击的是已选中的格子，才清除选择状态
       board.clearSelection()
       heroStore.selectHero(null)
-      
-      // 如果没有任何行动点了，自动结束回合
-      if (!gameStore.hasRemainingActions) {
-        setTimeout(() => {
-          gameStore.endHeroTurn()
-        }, 500)
-      } else if (selectedHero.actionPoints.move > 0) {
-        // 如果还有移动点数，重新显示可移动范围
-        const movablePositions = board.calculateMovableRange(
-          tile.position,
-          selectedHero.actionPoints.move  // 直接使用剩余移动点数
-        )
-        board.setSelectableTiles(movablePositions)
-      }
     }
-  } else if (isSelected(tile.position)) {
-    board.clearSelection()
-    heroStore.selectHero(null)
   }
 }
 

@@ -1,7 +1,8 @@
 import type { Hero, Skill, SkillTarget } from '@/types/character'
 import { HeroTag, DEFAULT_ACTION_POINTS } from '@/types/character'
+import { useHeroStore } from '@/stores/hero'
 
-// 添加基础攻击技能
+// 修改基础攻击技能
 const basicAttack: Skill = {
   id: 'basic_attack',
   name: '基础攻击',
@@ -11,12 +12,13 @@ const basicAttack: Skill = {
   cooldown: 0,
   currentCooldown: 0,
   range: 1,
-  type: 'active' as const,
-  targetType: 'single' as const,
+  type: 'active',
+  targetType: 'single',
   effect: (caster: Hero, target: SkillTarget) => {
     if (!('stats' in target)) return
     const damage = Math.max(1, caster.stats.attack - target.stats.defense)
-    target.stats.hp = Math.max(0, target.stats.hp - damage)
+    const heroStore = useHeroStore()
+    heroStore.applyDamage(target.id, damage)
   }
 }
 
@@ -34,8 +36,8 @@ export const enemies: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 70,
-      maxHp: 70,
+      hp: 1,
+      maxHp: 1,
       mp: 60,
       maxMp: 60,
       attack: 16,
@@ -64,8 +66,8 @@ export const enemies: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 65,
-      maxHp: 65,
+      hp: 1,
+      maxHp: 1,
       mp: 90,
       maxMp: 90,
       attack: 14,
@@ -94,8 +96,8 @@ export const enemies: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 100,
-      maxHp: 100,
+      hp: 1,
+      maxHp: 1,
       mp: 40,
       maxMp: 40,
       attack: 12,

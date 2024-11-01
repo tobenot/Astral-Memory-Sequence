@@ -32,16 +32,36 @@
         </div>
       </div>
     </div>
+
+    <!-- 添加胜利对话框 -->
+    <Dialog
+      v-model="gameStore.victoryDialogVisible"
+      title="胜利！"
+      :closeOnOverlay="false"
+    >
+      <div class="victory-dialog">
+        <h2>恭喜你取得胜利！</h2>
+        <p>你成功击败了所有敌人。</p>
+        <div class="dialog-buttons">
+          <Button @click="handleRestart">重新开始</Button>
+          <Button @click="handleBackToMenu" variant="secondary">返回主菜单</Button>
+        </div>
+      </div>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useGameStore } from '@/stores/game'
+import { useRouter } from 'vue-router'
 import TurnIndicator from '@/components/game/TurnIndicator.vue'
 import SkillBar from '@/components/game/SkillBar.vue'
+import Dialog from '@/components/ui/Dialog.vue'
+import Button from '@/components/ui/Button.vue'
 
 const gameStore = useGameStore()
+const router = useRouter()
 const showInfoPanel = ref(true)
 
 const isCurrentHeroAlly = computed(() => {
@@ -55,6 +75,15 @@ const handleEndTurn = () => {
 
 const handleSkipTurn = () => {
   gameStore.endHeroTurn()
+}
+
+const handleRestart = () => {
+  gameStore.restartGame()
+}
+
+const handleBackToMenu = () => {
+  gameStore.restartGame()
+  router.push('/')
 }
 </script>
 
@@ -186,6 +215,23 @@ const handleSkipTurn = () => {
         }
       }
     }
+  }
+}
+
+.victory-dialog {
+  text-align: center;
+  padding: 1rem;
+
+  h2 {
+    color: var(--sky-blue);
+    margin-bottom: 1rem;
+  }
+
+  .dialog-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
   }
 }
 </style> 

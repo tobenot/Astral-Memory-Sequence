@@ -1,5 +1,6 @@
 import type { Hero, Skill, SkillTarget } from '@/types/character'
 import { HeroTag, DEFAULT_ACTION_POINTS } from '@/types/character'
+import { useHeroStore } from '@/stores/hero'
 
 // 基础技能
 const basicAttack: Skill = {
@@ -14,9 +15,12 @@ const basicAttack: Skill = {
   type: 'active',
   targetType: 'single',
   effect: (caster: Hero, target: SkillTarget) => {
-    if (!('stats' in target)) return // 确保目标是英雄
+    if (!('stats' in target)) return
     const damage = Math.max(1, caster.stats.attack - target.stats.defense)
-    target.stats.hp = Math.max(0, target.stats.hp - damage)
+    console.log(`[Skill] ${caster.name} 使用基础攻击`)
+    
+    const heroStore = useHeroStore()
+    heroStore.applyDamage(target.id, damage)
   }
 }
 
@@ -38,9 +42,10 @@ const frostNova: Skill = {
     // 添加施法动画延迟
     await new Promise(resolve => setTimeout(resolve, 300))
     
+    const heroStore = useHeroStore()
     target.forEach(hero => {
       const damage = Math.max(1, caster.stats.attack * 1.2 - hero.stats.defense)
-      hero.stats.hp = Math.max(0, hero.stats.hp - damage)
+      heroStore.applyDamage(hero.id, damage)
       
       // 添加减速效果
       hero.status.push({
@@ -104,7 +109,8 @@ const windSlash: Skill = {
   effect: (caster: Hero, target: SkillTarget) => {
     if (!('stats' in target)) return // 确保目标是英雄
     const damage = Math.max(1, caster.stats.attack * 1.5 - target.stats.defense)
-    target.stats.hp = Math.max(0, target.stats.hp - damage)
+    const heroStore = useHeroStore()
+    heroStore.applyDamage(target.id, damage)
   }
 }
 
@@ -153,7 +159,8 @@ const preciseShot: Skill = {
   effect: (caster: Hero, target: SkillTarget) => {
     if (!('stats' in target)) return // 确保目标是英雄
     const damage = Math.max(1, caster.stats.attack * 1.8 - target.stats.defense)
-    target.stats.hp = Math.max(0, target.stats.hp - damage)
+    const heroStore = useHeroStore()
+    heroStore.applyDamage(target.id, damage)
   }
 }
 
@@ -234,9 +241,12 @@ const natureFury: Skill = {
   targetType: 'area',
   effect: (caster: Hero, target: SkillTarget) => {
     if (!Array.isArray(target)) return // 确保目标是英雄数组
+    const heroStore = useHeroStore()
+    
     target.forEach(hero => {
       const damage = Math.max(1, caster.stats.attack - hero.stats.defense)
-      hero.stats.hp = Math.max(0, hero.stats.hp - damage)
+      heroStore.applyDamage(hero.id, damage)
+      
       hero.status.push({
         id: `weakness_${Date.now()}`,
         name: '虚弱',
@@ -268,8 +278,8 @@ export const heroes: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 85,
-      maxHp: 85,
+      hp: 1,
+      maxHp: 1,
       mp: 100,
       maxMp: 100,
       attack: 12,
@@ -298,8 +308,8 @@ export const heroes: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 95,
-      maxHp: 95,
+      hp: 1,
+      maxHp: 1,
       mp: 60,
       maxMp: 60,
       attack: 15,
@@ -328,8 +338,8 @@ export const heroes: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 75,
-      maxHp: 75,
+      hp: 1,
+      maxHp: 1,
       mp: 80,
       maxMp: 80,
       attack: 14,
@@ -358,8 +368,8 @@ export const heroes: Hero[] = [
     exp: 0,
     position: { x: 0, y: 0 },
     stats: {
-      hp: 90,
-      maxHp: 90,
+      hp: 1,
+      maxHp: 1,
       mp: 120,
       maxMp: 120,
       attack: 8,
