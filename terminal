@@ -1,0 +1,16 @@
+# 创建基础目录结构
+mkdir -p src/{assets,components,views,store,types,utils,game/{core,entities,systems}} 
+
+# 创建基础样式文件
+mkdir -p src/assets/styles
+touch src/assets/styles/reset.scss
+touch src/assets/styles/base.scss 
+
+# 删除 node_modules 文件夹
+rm -rf node_modules package-lock.json
+
+# 重新安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev 

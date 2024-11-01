@@ -1,0 +1,18 @@
+:root {
+  --columbia-blue: #cfe8efff;
+  --columbia-blue-2: #c6dbf0ff;
+  --columbia-blue-3: #aed1e6ff;
+  --powder-blue: #a0c4e2ff;
+  --sky-blue: #85c7deff;
+}
+
+// Breakpoints
+$mobile: 320px;
+$tablet: 768px;
+$desktop: 1024px;
+$widescreen: 1280px;
+
+// Game specific
+$grid-size: 80px;
+$character-width: 120px;
+$character-height: 160px; 

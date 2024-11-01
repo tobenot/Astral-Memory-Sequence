@@ -14,6 +14,9 @@
 - CSS Grid/Flexbox (棋盘布局)
 - CSS Transitions/Animations (技能特效)
 
+开发工具：
+Windows
+
 2. 项目结构
 -----------------
 src/
