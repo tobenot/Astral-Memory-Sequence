@@ -6,7 +6,7 @@ import { useHeroStore } from '@/stores/hero'
 const basicAttack: Skill = {
   id: 'basic_attack',
   name: '基础攻击',
-  description: '近距离攻击',
+  description: '近距离攻击，造成100%攻击力的伤害',
   icon: '/skills/basic_attack.png',
   mpCost: 0,
   cooldown: 0,
@@ -17,8 +17,6 @@ const basicAttack: Skill = {
   effect: (caster: Hero, target: SkillTarget) => {
     if (!('stats' in target)) return
     const damage = Math.max(1, caster.stats.attack - target.stats.defense)
-    console.log(`[Skill] ${caster.name} 使用基础攻击`)
-    
     const heroStore = useHeroStore()
     heroStore.applyDamage(target.id, damage)
   }
@@ -28,18 +26,18 @@ const basicAttack: Skill = {
 const frostNova: Skill = {
   id: 'frost_nova',
   name: '霜华绽放',
-  description: '释放寒冰能量，对周围敌人造成伤害并减速',
+  description: '释放寒冰能量，对范围内敌人造成120%魔法伤害并减速40%',
   icon: '/skills/frost_nova.png',
-  mpCost: 35,
-  cooldown: 3,
+  mpCost: 25,
+  cooldown: 2,
   currentCooldown: 0,
   range: 2,
   type: 'active',
   targetType: 'area',
+  aoeRange: 1,
   effect: async (caster: Hero, target: SkillTarget) => {
-    if (!Array.isArray(target)) return // 确保目标是英雄数组
+    if (!Array.isArray(target)) return
     
-    // 添加施法动画延迟
     await new Promise(resolve => setTimeout(resolve, 300))
     
     const heroStore = useHeroStore()
@@ -47,17 +45,16 @@ const frostNova: Skill = {
       const damage = Math.max(1, caster.stats.attack * 1.2 - hero.stats.defense)
       heroStore.applyDamage(hero.id, damage)
       
-      // 添加减速效果
       hero.status.push({
         id: `frost_${Date.now()}`,
         name: '霜冻',
-        description: '移动速度降低30%',
+        description: '移动速度降低40%',
         icon: '/status/frost.png',
         duration: 2,
         effect: {
           type: 'debuff',
           stats: {
-            speed: 0.3
+            speed: 0.4
           }
         }
       })
@@ -68,26 +65,27 @@ const frostNova: Skill = {
 const iceShield: Skill = {
   id: 'ice_shield',
   name: '寒冰护盾',
-  description: '为自己或队友提供一个吸收伤害的护盾',
+  description: '为目标提供一个吸收70%伤害的护盾，并提升30%防御力',
   icon: '/skills/ice_shield.png',
-  mpCost: 25,
+  mpCost: 20,
   cooldown: 2,
   currentCooldown: 0,
   range: 3,
   type: 'active',
   targetType: 'single',
   effect: (caster: Hero, target: SkillTarget) => {
-    if (!('stats' in target)) return // 确保目标是英雄
+    if (!('stats' in target)) return
     target.status.push({
       id: `shield_${Date.now()}`,
       name: '寒冰护盾',
-      description: '防御力提升50%',
+      description: '防御力提升30%，减免70%伤害',
       icon: '/status/ice_shield.png',
       duration: 2,
       effect: {
         type: 'buff',
         stats: {
-          defense: 0.5
+          defense: 0.3,
+          damageReduction: 0.7
         }
       }
     })
@@ -98,46 +96,59 @@ const iceShield: Skill = {
 const windSlash: Skill = {
   id: 'wind_slash',
   name: '风之斩击',
-  description: '快速突进并对目标造成伤害',
+  description: '快速突进并造成180%攻击力的伤害，击中后获得1回合加速',
   icon: '/skills/wind_slash.png',
-  mpCost: 25,
+  mpCost: 20,
   cooldown: 2,
   currentCooldown: 0,
   range: 3,
   type: 'active',
   targetType: 'single',
   effect: (caster: Hero, target: SkillTarget) => {
-    if (!('stats' in target)) return // 确保目标是英雄
-    const damage = Math.max(1, caster.stats.attack * 1.5 - target.stats.defense)
+    if (!('stats' in target)) return
+    const damage = Math.max(1, caster.stats.attack * 1.8 - target.stats.defense)
     const heroStore = useHeroStore()
     heroStore.applyDamage(target.id, damage)
+    
+    caster.status.push({
+      id: `swift_${Date.now()}`,
+      name: '疾风',
+      description: '移动速度提升30%',
+      icon: '/status/swift.png',
+      duration: 1,
+      effect: {
+        type: 'buff',
+        stats: {
+          speed: 0.3
+        }
+      }
+    })
   }
 }
 
 const swordDance: Skill = {
   id: 'sword_dance',
   name: '剑舞',
-  description: '提升自身攻击力和移动速度',
+  description: '进入剑舞状态，提升50%攻击力和30%移动速度，持续2回合',
   icon: '/skills/sword_dance.png',
-  mpCost: 30,
-  cooldown: 4,
+  mpCost: 25,
+  cooldown: 3,
   currentCooldown: 0,
   range: 0,
   type: 'active',
   targetType: 'self',
-  effect: (caster: Hero, target: SkillTarget) => {
-    if (target !== caster) return // 确保目标是施法者自己
+  effect: (caster: Hero) => {
     caster.status.push({
       id: `dance_${Date.now()}`,
       name: '剑舞',
-      description: '攻击力提升30%，移动速度提升20%',
+      description: '攻击力提升50%，移动速度提升30%',
       icon: '/status/sword_dance.png',
-      duration: 3,
+      duration: 2,
       effect: {
         type: 'buff',
         stats: {
-          attack: 0.3,
-          speed: 0.2
+          attack: 0.5,
+          speed: 0.3
         }
       }
     })
@@ -148,7 +159,7 @@ const swordDance: Skill = {
 const preciseShot: Skill = {
   id: 'precise_shot',
   name: '精准射击',
-  description: '对单一目标造成高额伤害',
+  description: '对单一目标造成200%攻击力的伤害，如果目标生命值低于30%则必定暴击',
   icon: '/skills/precise_shot.png',
   mpCost: 20,
   cooldown: 2,
@@ -157,39 +168,43 @@ const preciseShot: Skill = {
   type: 'active',
   targetType: 'single',
   effect: (caster: Hero, target: SkillTarget) => {
-    if (!('stats' in target)) return // 确保目标是英雄
-    const damage = Math.max(1, caster.stats.attack * 1.8 - target.stats.defense)
+    if (!('stats' in target)) return
+    let damage = caster.stats.attack * 2 - target.stats.defense
+    
+    if (target.stats.hp < target.stats.maxHp * 0.3) {
+      damage *= 1.5
+    }
+    
     const heroStore = useHeroStore()
-    heroStore.applyDamage(target.id, damage)
+    heroStore.applyDamage(target.id, Math.max(1, damage))
   }
 }
 
 const shadowStep: Skill = {
   id: 'shadow_step',
-  name: '影步',
-  description: '快速移动到指定位置并获得隐身效果',
+  name: '影袭',
+  description: '瞬移到目标位置并获得隐身效果，下次攻击造成150%伤害',
   icon: '/skills/shadow_step.png',
-  mpCost: 35,
-  cooldown: 3,
+  mpCost: 30,
+  cooldown: 2,
   currentCooldown: 0,
   range: 3,
   type: 'active',
   targetType: 'position',
   effect: (caster: Hero, target: SkillTarget) => {
-    if (!('x' in target)) return // 确保目标是位置
-    // 移动到目标位置
+    if (!('x' in target)) return
     caster.position = target
-    // 添加隐身效果
     caster.status.push({
       id: `stealth_${Date.now()}`,
-      name: '隐身',
-      description: '防御力提升30%',
+      name: '隐袭',
+      description: '隐身状态，下次攻击伤害提升50%',
       icon: '/status/stealth.png',
       duration: 1,
       effect: {
         type: 'buff',
         stats: {
-          defense: 0.3
+          attackBonus: 0.5,
+          stealth: true
         }
       }
     })
@@ -200,28 +215,29 @@ const shadowStep: Skill = {
 const natureBlessing: Skill = {
   id: 'nature_blessing',
   name: '自然祝福',
-  description: '治疗目标并提供防御增益',
+  description: '治疗目标30%最大生命值，并提供一个可以抵挡一次致命伤害的护盾',
   icon: '/skills/nature_blessing.png',
-  mpCost: 30,
+  mpCost: 25,
   cooldown: 2,
   currentCooldown: 0,
   range: 3,
   type: 'active',
   targetType: 'single',
   effect: (caster: Hero, target: SkillTarget) => {
-    if (!('stats' in target)) return // 确保目标是英雄
-    const healing = caster.stats.attack * 1.2
+    if (!('stats' in target)) return
+    const healing = target.stats.maxHp * 0.3
     target.stats.hp = Math.min(target.stats.maxHp, target.stats.hp + healing)
+    
     target.status.push({
       id: `blessing_${Date.now()}`,
-      name: '自然祝福',
-      description: '防御力提升20%',
+      name: '生命护盾',
+      description: '可以抵挡一次致命伤害',
       icon: '/status/blessing.png',
       duration: 2,
       effect: {
         type: 'buff',
         stats: {
-          defense: 0.2
+          deathPrevention: true
         }
       }
     })
@@ -231,32 +247,33 @@ const natureBlessing: Skill = {
 const natureFury: Skill = {
   id: 'nature_fury',
   name: '自然之怒',
-  description: '召唤自然之力攻击敌人并降低其攻击力',
+  description: '对范围内敌人造成伤害并施加易伤效果，使其受到的伤害提升40%',
   icon: '/skills/nature_fury.png',
-  mpCost: 40,
+  mpCost: 35,
   cooldown: 3,
   currentCooldown: 0,
   range: 3,
   type: 'active',
   targetType: 'area',
+  aoeRange: 2,
   effect: (caster: Hero, target: SkillTarget) => {
-    if (!Array.isArray(target)) return // 确保目标是英雄数组
+    if (!Array.isArray(target)) return
     const heroStore = useHeroStore()
     
     target.forEach(hero => {
-      const damage = Math.max(1, caster.stats.attack - hero.stats.defense)
+      const damage = Math.max(1, caster.stats.attack * 1.2 - hero.stats.defense)
       heroStore.applyDamage(hero.id, damage)
       
       hero.status.push({
-        id: `weakness_${Date.now()}`,
-        name: '虚弱',
-        description: '攻击力降低25%',
-        icon: '/status/weakness.png',
+        id: `vulnerable_${Date.now()}`,
+        name: '易伤',
+        description: '受到的伤害提升40%',
+        icon: '/status/vulnerable.png',
         duration: 2,
         effect: {
           type: 'debuff',
           stats: {
-            attack: 0.25
+            damageReceived: 0.4
           }
         }
       })
