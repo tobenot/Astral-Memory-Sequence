@@ -47,6 +47,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Hero } from '@/types/character'
+import type { Tile } from '@/types/board'
 import { useGameStore } from '@/stores/game'
 import { useBoardStore } from '@/stores/board'
 import { useHeroStore } from '@/stores/hero'
@@ -87,7 +88,7 @@ const handleClick = () => {
     }
     emit('tile-click', tile)
   } else {
-    emit('click')
+    emit('click', props.hero)
   }
 }
 
