@@ -1,5 +1,5 @@
 import type { Hero, Skill } from '@/types/character'
-import { HeroTag } from '@/types/character'
+import { HeroTag, DEFAULT_ACTION_POINTS } from '@/types/character'
 
 // 技能示例
 const frostNova: Skill = {
@@ -59,7 +59,13 @@ export const heroes: Hero[] = [
     },
     skills: [frostNova],
     status: [],
-    isAlly: true
+    isAlly: true,
+    actionPoints: { ...DEFAULT_ACTION_POINTS },
+    maxActionPoints: {
+      move: 2,
+      skill: 1,
+      item: 1
+    }
   },
   {
     id: 'blade_master',
@@ -84,7 +90,13 @@ export const heroes: Hero[] = [
     },
     skills: [windSlash],
     status: [],
-    isAlly: true
+    isAlly: true,
+    actionPoints: { ...DEFAULT_ACTION_POINTS },
+    maxActionPoints: {
+      move: 3,
+      skill: 1,
+      item: 1
+    }
   },
   {
     id: 'luna',
@@ -109,7 +121,13 @@ export const heroes: Hero[] = [
     },
     skills: [],
     status: [],
-    isAlly: true
+    isAlly: true,
+    actionPoints: { ...DEFAULT_ACTION_POINTS },
+    maxActionPoints: {
+      move: 3,
+      skill: 1,
+      item: 1
+    }
   },
   {
     id: 'gaia',
@@ -134,6 +152,12 @@ export const heroes: Hero[] = [
     },
     skills: [],
     status: [],
-    isAlly: true
+    isAlly: true,
+    actionPoints: { ...DEFAULT_ACTION_POINTS },
+    maxActionPoints: {
+      move: 3,
+      skill: 1,
+      item: 1
+    }
   }
 ] 

@@ -36,6 +36,12 @@ export interface Skill {
   effect: (caster: Hero, target: Position) => void
 }
 
+export interface ActionPoints {
+  move: number
+  skill: number
+  item: number
+}
+
 export interface Hero {
   id: string
   name: string
@@ -51,6 +57,8 @@ export interface Hero {
   skills: Skill[]       // 英雄特有技能
   status: StatusEffect[]
   isAlly: boolean
+  actionPoints: ActionPoints  // 添加行动点属性
+  maxActionPoints: ActionPoints  // 添加最大行动点属性
 }
 
 export interface StatusEffect {
@@ -63,4 +71,11 @@ export interface StatusEffect {
     type: 'buff' | 'debuff'
     stats: Partial<HeroStats>
   }
+}
+
+// 默认行动点配置
+export const DEFAULT_ACTION_POINTS: ActionPoints = {
+  move: 1,
+  skill: 1,
+  item: 1
 } 

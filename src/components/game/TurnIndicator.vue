@@ -20,15 +20,15 @@
         >
       </div>
     </div>
-    <div class="action-points">
-      <div class="point move" :class="{ 'used': !canMove }">
-        <span>移动</span>
+    <div v-if="currentHero" class="action-points">
+      <div class="point move" :class="{ 'used': !currentHero.actionPoints.move }">
+        <span>移动 ({{ currentHero.actionPoints.move }}/{{ currentHero.maxActionPoints.move }})</span>
       </div>
-      <div class="point skill" :class="{ 'used': !canUseSkill }">
-        <span>技能</span>
+      <div class="point skill" :class="{ 'used': !currentHero.actionPoints.skill }">
+        <span>技能 ({{ currentHero.actionPoints.skill }}/{{ currentHero.maxActionPoints.skill }})</span>
       </div>
-      <div class="point item" :class="{ 'used': !canUseItem }">
-        <span>道具</span>
+      <div class="point item" :class="{ 'used': !currentHero.actionPoints.item }">
+        <span>道具 ({{ currentHero.actionPoints.item }}/{{ currentHero.maxActionPoints.item }})</span>
       </div>
     </div>
   </div>
@@ -44,9 +44,7 @@ const heroStore = useHeroStore()
 
 const currentTurn = computed(() => gameStore.currentTurn)
 const turnState = computed(() => gameStore.turnState)
-const canMove = computed(() => gameStore.canMove)
-const canUseSkill = computed(() => gameStore.canUseSkill)
-const canUseItem = computed(() => gameStore.canUseItem)
+const currentHero = computed(() => gameStore.currentHero)
 
 const getHeroAvatar = (heroId: string) => {
   return heroStore.heroes.get(heroId)?.avatar || ''

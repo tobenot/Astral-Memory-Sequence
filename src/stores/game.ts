@@ -7,6 +7,7 @@ import { SpawnPointType } from '@/types/map'
 import { DEFAULT_ACTION_POINTS } from '@/types/turn'
 import { heroes } from '@/data/heroes'
 import { TurnPhase } from '@/types/turn'
+import type { ActionPoints } from '@/types/character'
 
 interface GameState {
   currentTurn: number
@@ -79,27 +80,23 @@ export const useGameStore = defineStore('game', {
       const heroStore = useHeroStore()
       const hero = heroStore.heroes.get(heroId)
       
-      // 确保英雄存在
       if (!hero) return
       
-      // 设置回合状态为处理中，防止重复触发
       this.turnState.isProcessing = true
-      
       this.turnState.currentHeroId = heroId
-      this.turnState.remainingActions = 1
       this.turnState.phase = TurnPhase.ACTION
-      this.actionPoints = { ...DEFAULT_ACTION_POINTS }
+      
+      // 重置角色的行动点
+      hero.actionPoints = { ...hero.maxActionPoints }
       
       heroStore.setActiveHero(heroId)
       
-      // 如果是AI控制的敌人，自动触发AI回合
       if (!hero.isAlly) {
         console.log('AI回合:', hero.name)
         setTimeout(() => {
           this.endHeroTurn()
         }, 1000)
       } else {
-        // 友方角色回合开始时，重置处理状态
         this.turnState.isProcessing = false
       }
     },
@@ -134,20 +131,22 @@ export const useGameStore = defineStore('game', {
       }, 300)
     },
 
-    useActionPoint(type: keyof ActionPoint) {
-      if (this.actionPoints[type] > 0) {
-        this.actionPoints[type]--
-        
-        // 检查是否还有剩余行动点，如果没有则自动结束回合
-        if (!this.hasRemainingActions && !this.turnState.isProcessing) {
-          setTimeout(() => {
-            this.endHeroTurn()
-          }, 500)
-        }
-        
-        return true
+    useActionPoint(type: keyof ActionPoints) {
+      const hero = this.currentHero
+      if (!hero || !hero.actionPoints[type]) return false
+
+      hero.actionPoints[type]--
+      
+      // 检查是否还有任何可用的行动点
+      const hasRemainingActions = Object.values(hero.actionPoints).some(points => points > 0)
+      
+      if (!hasRemainingActions && !this.turnState.isProcessing) {
+        setTimeout(() => {
+          this.endHeroTurn()
+        }, 500)
       }
-      return false
+      
+      return true
     },
 
     spawnHeroes() {

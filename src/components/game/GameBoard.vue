@@ -155,14 +155,23 @@ const handleTileClick = (tile: Tile) => {
   const selectedHero = heroStore.selectedHero
   
   if (selectedHero && isSelectable(tile.position)) {
-    // 移动英雄
-    if (gameStore.canMove) {
+    // 检查是否有移动点数
+    if (selectedHero.actionPoints.move > 0) {
+      // 移动英雄
       heroStore.moveHero(selectedHero.id, tile.position)
       // 消耗移动点数
-      gameStore.useActionPoint('move')
+      selectedHero.actionPoints.move--
       // 清除选择状态
       board.clearSelection()
       heroStore.selectHero(null)
+      
+      // 如果没有任何行动点了，自动结束回合
+      const hasRemainingActions = Object.values(selectedHero.actionPoints).some(points => points > 0)
+      if (!hasRemainingActions) {
+        setTimeout(() => {
+          gameStore.endHeroTurn()
+        }, 500)
+      }
     }
   } else if (isSelected(tile.position)) {
     board.clearSelection()
@@ -193,8 +202,8 @@ const handleHeroClick = (hero: Hero) => {
   // 只能选择当前行动的角色，并且必须是友方角色
   if (hero.id === gameStore.turnState.currentHeroId && hero.isAlly) {
     heroStore.selectHero(hero.id)
-    // 如果还有移动点数，显示移动范围
-    if (gameStore.canMove) {
+    // 只有在有移动点数的情况下才显示移动范围
+    if (hero.actionPoints.move > 0) {
       calculateMovableRange(hero.position, hero.stats.moveRange)
     }
   }
